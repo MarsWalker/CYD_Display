@@ -1,0 +1,15 @@
+{
+      "Refresh": 3000,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+		{
+		  "Type": "DrawJPG",
+		  "X": 0,
+		  "Y": 0,
+		  "URL": "https://picsum.photos/320/200"
+		}
+      ]
+}

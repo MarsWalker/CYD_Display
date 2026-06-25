@@ -1,0 +1,60 @@
+{
+	"DataSources": [
+		{
+			"Type": "Weather",
+			"Id": "weather_santo_tirso",
+			"Refresh": 600000,
+			"url": "https://api.open-meteo.com/v1/forecast?latitude=41.3426&longitude=-8.4775&current=temperature_2m,relative_humidity_2m,pressure_msl,weather_code,wind_speed_10m",
+			"Map":
+			{
+				"temperature": "current.temperature_2m",
+				"humidity": "current.relative_humidity_2m",
+				"pressure": "current.pressure_msl",
+				"wind": "current.wind_speed_10m",
+				"code": "current.weather_code"
+			},
+			"Codes":
+			{
+				"0":  { "label": "Clear sky",             "image": "sun",          "url": "https://..." },
+				"1":  { "label": "Mainly clear",          "image": "sun",          "url": "https://..." },
+				"2":  { "label": "Partly cloudy",         "image": "cloud_sun",    "url": "https://..." },
+				"3":  { "label": "Overcast",              "image": "cloud",        "url": "https://..." },
+				"45": { "label": "Fog",                   "image": "fog",          "url": "https://..." },
+				"48": { "label": "Depositing rime fog",   "image": "fog",          "url": "https://..." },
+				"61": { "label": "Light rain",            "image": "rain_light",   "url": "https://..." },
+				"63": { "label": "Moderate rain",         "image": "rain",         "url": "https://..." },
+				"65": { "label": "Heavy rain",            "image": "rain_heavy",   "url": "https://..." },
+				"80": { "label": "Light rain showers",    "image": "shower_light", "url": "https://..." },
+				"81": { "label": "Moderate rain showers", "image": "shower",       "url": "https://..." },
+				"82": { "label": "Violent rain showers",  "image": "shower_heavy", "url": "https://..." },
+				"95": { "label": "Thunderstorm",          "image": "storm",        "url": "https://..." }
+			}
+		}
+	],
+	"Screens": [
+		{
+			"Invert": false,
+			"Rotation": 4,
+			"Number": 1,
+			"Name": "main.json"
+		},
+		{
+			"Invert": false,
+			"Rotation": 1,
+			"Number": 3,
+			"Name": "HA.json"
+		},
+		{
+			"Invert": false,
+			"Rotation": 1,
+			"Number": 4,
+			"Name": "jpg.json"
+		},
+		{
+			"Invert": false,
+			"Rotation": 4,
+			"Number": 5,
+			"Name": "HA_Vertical.json"
+		}
+	]
+}
