@@ -47,7 +47,7 @@ const char* TELEGRAM_CHAT_ID = "XXXXXXXXXX";                                   /
 // ============================================================================
 // SYSTEM & DEVICE PROPERTIES
 // ============================================================================
-const char* JSON_URL = "https://github.com/MarsWalker/CYD_Display/tree/main/dashboards"; // URL pointing to your screen configuration repository
+const char* JSON_URL = "https://raw.githubusercontent.com/MarsWalker/CYD_Display/refs/heads/main/dashboards/"; // URL pointing to your screen configuration repository
 const char* HOSTNAME = "board_name";  // The mDNS/network name registered by this specific ESP32 board
 
 #endif
