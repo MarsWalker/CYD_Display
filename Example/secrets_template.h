@@ -14,10 +14,6 @@ const char* WIFI_PASSWORD = "WIFI Secret Password"; // The security password for
 // ============================================================================
 const char* HA_URL        = "http://homeassistant.lan:8123"; // Base URL of your HA instance (IP address or local hostname)
 
-
-const int log_color = TFT_WHITE;
-const int log_font = 2;
-
 /* * ----------------------------------------------------------------------------
  * HOME ASSISTANT LONG-LIVED ACCESS TOKEN (HA_TOKEN)
  * ----------------------------------------------------------------------------
