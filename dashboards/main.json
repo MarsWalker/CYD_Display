@@ -39,11 +39,11 @@
         },
         {
           "Type": "NoTouch",
-		  "TouchX1": 255, 
-		  "TouchY1": 5,
-		  "TouchX2": 280, 
-		  "TouchY2": 50,
-		  "TouchAction": "goto:2"
+		  "NoTouchX1": 255, 
+		  "NoTouchY1": 5,
+		  "NoTouchX2": 280, 
+		  "NoTouchY2": 50,
+		  "NoTouchAction": "goto:2"
         },
         {
           "Type": "DrawHASensorMultiSensor",
