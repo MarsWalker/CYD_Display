@@ -21,38 +21,6 @@
           "Font": 4,
           "Color": "white"
         },
-        {
-          "Type": "DrawHASensorMultiSensor",
-          "IconX": 255,
-          "IconY": 5,
-          "entity": "binary_sensor.porta_cozinha_contact,binary_sensor.porta_centro_cave_contact,binary_sensor.porta_entrada_contact,binary_sensor.porta_cozinha_cave_contact,binary_sensor.porta_oficina_cave_contact",
-          "state:on": "DrawImage:door_open",
-          "state:open": "DrawImage:door_open",
-          "state:detected": "DrawImage:door_open",
-          "else": "DrawImage:door_closed",
-          "state:": "DrawImage:warning",
-          "Font": 2,
-          "Color": "White",
-          "X": 250,
-          "Y": 40,
-          "Text": "Portas"
-        },
-        {
-          "Type": "DrawHASensorMultiSensor",
-          "IconX": 205,
-          "IconY": 5,
-          "entity": "binary_sensor.pessoas_pc_occupancy,binary_sensor.pessoas_salinha_presence,binary_sensor.pessoas_sala_presence,binary_sensor.pessoas_escada_presence,binary_sensor.pessoas_wc_presence,binary_sensor.pessoas_escada_presence,binary_sensor.pessoas_cozinha_cave_presence,binary_sensor.pessoas_pir_centro_occupancy,binary_sensor.pessoas_pir_oficina_occupancy",
-          "state:on": "DrawImage:person_on",
-          "state:open": "DrawImage:person_on",
-          "state:detected": "DrawImage:person_on",
-          "else": "DrawImage:person_off",
-          "state:": "DrawImage:warning",
-          "Font": 2,
-          "Color": "White",
-          "X": 200,
-          "Y": 40,
-          "Text": "People"
-        },
 		{
 		  "Type": "DrawText",
 		  "X": 40,
