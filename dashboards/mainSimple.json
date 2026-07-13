@@ -1,0 +1,125 @@
+{
+      "Refresh": 1000,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "_Type": "DrawText",
+          "X": 10,
+          "Y": 10,
+          "Text": "RELOGIO",
+          "Font": 4,
+          "Color": "Green"
+        },
+        {
+          "Type": "DrawText",
+          "X": 5,
+          "Y": 5,
+          "Text": "function:Clock",
+          "Font": 4,
+          "Color": "white"
+        },
+        {
+          "Type": "DrawHASensorMultiSensor",
+          "IconX": 255,
+          "IconY": 5,
+          "entity": "binary_sensor.porta_cozinha_contact,binary_sensor.porta_centro_cave_contact,binary_sensor.porta_entrada_contact,binary_sensor.porta_cozinha_cave_contact,binary_sensor.porta_oficina_cave_contact",
+          "state:on": "DrawImage:door_open",
+          "state:open": "DrawImage:door_open",
+          "state:detected": "DrawImage:door_open",
+          "else": "DrawImage:door_closed",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 250,
+          "Y": 40,
+          "Text": "Portas"
+        },
+        {
+          "Type": "DrawHASensorMultiSensor",
+          "IconX": 205,
+          "IconY": 5,
+          "entity": "binary_sensor.pessoas_pc_occupancy,binary_sensor.pessoas_salinha_presence,binary_sensor.pessoas_sala_presence,binary_sensor.pessoas_escada_presence,binary_sensor.pessoas_wc_presence,binary_sensor.pessoas_escada_presence,binary_sensor.pessoas_cozinha_cave_presence,binary_sensor.pessoas_pir_centro_occupancy,binary_sensor.pessoas_pir_oficina_occupancy",
+          "state:on": "DrawImage:person_on",
+          "state:open": "DrawImage:person_on",
+          "state:detected": "DrawImage:person_on",
+          "else": "DrawImage:person_off",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 200,
+          "Y": 40,
+          "Text": "People"
+        },
+		{
+		  "Type": "DrawText",
+		  "X": 40,
+		  "Y": 75,
+		  "Font": 2,
+		  "Color": "White",
+		  "Text": "datasource:weather_santo_tirso:codeText"
+		},
+		{
+		  "Type": "DrawImage",
+		  "X": 10,
+		  "Y": 70,
+		  "Zoom": 1,
+		  "Image": "datasource:weather_santo_tirso:code_image",
+		  "Color": "White"
+		},
+		{
+		  "Type": "DrawText",
+		  "X": 10,
+		  "Y": 100,
+		  "Text": "datasource:weather_santo_tirso:temperature",
+		  "Preffix": "Temp:",
+		  "Suffix": " ºC",
+		  "Font": 4,
+		  "Color": "Yellow"
+		},
+		{
+		  "Type": "DrawText",
+		  "X": 10,
+		  "Y": 130,
+		  "Text": "datasource:weather_santo_tirso:humidity",
+		  "Preffix": "Humidade: ",
+		  "Suffix": " Ha",
+		  "Font": 2,
+		  "Color": "Green"
+		},
+        {
+          "Type": "DrawImageBool",
+          "X": 290,
+          "Y": 5,
+          "Value": "function:IsWIFIConnected",
+          "true": "DrawImage:wifi_on",
+          "false": "DrawImage:wifi_off"
+        },
+        {
+          "Type": "DrawText",
+          "X": 20,
+          "Y": 160,
+          "Text": "IP:",
+          "Font": 2,
+          "Color": "Magenta"
+        },
+        {
+          "Type": "DrawText",
+          "X": 50,
+          "Y": 160,
+          "Text": "function:MyIP",
+          "Font": 2,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawText",
+          "X": 200,
+          "Y": 200,
+          "Text": "Toca -> ecra 3",
+          "Font": 1,
+          "Color": "DarkGrey"
+        }
+      ]
+}
