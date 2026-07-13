@@ -48,12 +48,18 @@
 			"Invert": false,
 			"Rotation": 1,
 			"Number": 3,
+			"Name": "jpgDirect.json"
+		},
+		{
+			"Invert": false,
+			"Rotation": 1,
+			"Number": 4,
 			"Name": "jpg.json"
 		},
 		{
 			"Invert": false,
 			"Rotation": 4,
-			"Number": 4,
+			"Number": 5,
 			"Name": "HA_Vertical.json"
 		}
 	]
