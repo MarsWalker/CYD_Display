@@ -34,7 +34,7 @@
 	"Screens": [
 		{
 			"Invert": true,
-			"Rotation": 0,
+			"Rotation": 1,
 			"Number": 1,
 			"Name": "main.json"
 		},
