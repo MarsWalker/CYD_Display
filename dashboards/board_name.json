@@ -39,7 +39,7 @@
 			"Name": "main.json"
 		},
 		{
-			"Invert": false,
+			"Invert": true,
 			"Rotation": 1,
 			"Number": 2,
 			"Name": "HA.json"
