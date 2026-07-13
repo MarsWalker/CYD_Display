@@ -41,19 +41,19 @@
 		{
 			"Invert": false,
 			"Rotation": 1,
-			"Number": 3,
+			"Number": 2,
 			"Name": "HA.json"
 		},
 		{
 			"Invert": false,
 			"Rotation": 1,
-			"Number": 4,
+			"Number": 3,
 			"Name": "jpg.json"
 		},
 		{
 			"Invert": false,
 			"Rotation": 4,
-			"Number": 5,
+			"Number": 4,
 			"Name": "HA_Vertical.json"
 		}
 	]
