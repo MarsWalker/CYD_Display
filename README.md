@@ -91,6 +91,8 @@ This project relies on the **TFT_eSPI** library, which requires a custom `User_S
    `Documents/Arduino/libraries/TFT_eSPI/User_Setup.h` with the downloaded one.
 
 ---
+Tested on a ESP32-2432S028R with a 2.8 inch ILI9341 240×320 TFT LCD touchscreen.
+---
 
 ## 🤝 Contributing & License
 
