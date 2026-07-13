@@ -45,7 +45,7 @@
 			"Name": "HA.json"
 		},
 		{
-			"Invert": false,
+			"Invert": true,
 			"Rotation": 1,
 			"Number": 3,
 			"Name": "jpgDirect.json"
