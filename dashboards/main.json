@@ -38,7 +38,7 @@
           "Text": "Portas"
         },
         {
-          "Type": "Touch",
+          "Type": "NoTouch",
 		  "TouchX1": 255, 
 		  "TouchY1": 5,
 		  "TouchX2": 280, 
@@ -125,11 +125,11 @@
           "Type": "DrawText",
           "X": 200,
           "Y": 200,
-		  "TouchX1": 255, 
-		  "TouchY1": 215,
-		  "TouchX2": 320, 
-		  "TouchY2": 240,
-		  "TouchAction": "goto:3",
+		  "NoTouchX1": 255, 
+		  "NoTouchY1": 215,
+		  "NoTouchX2": 320, 
+		  "NoTouchY2": 240,
+		  "NoTouchAction": "goto:3",
           "Text": "Toca -> ecra 3",
           "Font": 1,
           "Color": "DarkGrey"
