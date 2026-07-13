@@ -1,6 +1,6 @@
 // Rename this file to secrets.h and update the information
 
-ifndef SECRETS_H
+#ifndef SECRETS_H
 #define SECRETS_H
 
 // ============================================================================

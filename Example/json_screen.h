@@ -431,8 +431,8 @@ unsigned long LoadAndDrawScreen(const char* url, unsigned long numeroEcra, bool 
             alvoEcra = currentScreenObj["Number"].as<int>();
         }
 
-        if (currentScreenObj.containsKey("name")) {
-            subScreenName = currentScreenObj["name"].as<String>();
+        if (currentScreenObj.containsKey("Name")) {
+            subScreenName = currentScreenObj["Name"].as<String>();
         }
     }
 
@@ -443,6 +443,7 @@ unsigned long LoadAndDrawScreen(const char* url, unsigned long numeroEcra, bool 
 
     // PHASE 2: Fetch and Render Target Sub-Screen Dynamic Component Elements
     String subScreenUrl = String(JSON_URL) + subScreenName;
+    Serial.println("Loading " + String(subScreenUrl) + ".");
 
     HTTPClient http;
     http.begin(subScreenUrl);

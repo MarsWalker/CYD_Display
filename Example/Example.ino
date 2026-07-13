@@ -42,6 +42,7 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds); // NTP time tr
 // Dynamic Project Module Includes (Compilation order is strict!)
 // ===========================================================
 #include "secrets.h"          // Passwords, Private API Keys, URLs, and Identity setups
+#include "logutils.h"         // Log functions
 #include "wifi_functions.h"   // Wi-Fi operational management and handshake loops
 #include "colors.h"           // Color translation tables and RGB565 format conversion engines
 #include "images.h"           // Flash-optimized binary bitmaps (PROGMEM array registries)
@@ -50,44 +51,33 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds); // NTP time tr
 #include "touch.h"            // SPI touch capture abstraction layer
 #include "json_screen.h"      // Dynamic interface compiler parsing structural layout streams
 
-// ===========================================================
-// Microcontroller Setup Entrypoint (Runs once on boot)
-// ===========================================================
 void setup()
 {
-    // Open hardware peripheral UART line for code debugging output
     Serial.begin(115200);
-    Serial.println("\n=== Starting ===");
 
-    // Establish link connection to the local network access point router
+    tft.init();
+    tft.invertDisplay(true);
+    tft.setRotation(1);
+    tft.fillScreen(TFT_BLACK);
+
+    resetLog();
+    writeLogln("=== Starting ===");
+
     ConnectWifi();
 
-    // Fire up hardware SPI communication channels to initialize screen registers
-    tft.init();
-    tft.invertDisplay(true);   // Flips standard color profiles to fix variant color issues
-    tft.setRotation(1);        // Configures standard horizontal wide landscape mode layout
-    tft.fillScreen(TFT_BLACK); // Clears the graphic frame buffer artifact garbage to black
-
-    // Register graphic target converter function to render JPEG stream structures
-    TJpgDec.setCallback(tft_output);
-        
-    // Boot up the synchronization client module targeting internet time servers
     timeClient.begin();
     timeClient.update();
 
-    // Use values imported from secrets.h to parse dynamic target server JSON layouts
     String fullConfigURL = String(JSON_URL) + String(HOSTNAME) + ".json";
+    writeLogln(fullConfigURL);
 
-    // Query configuration matrix files to resolve dynamic compilation boundaries
     totalScreens = CountScreens(fullConfigURL.c_str());
-    if (totalScreens == 0) totalScreens = 1; // Security fallback assertion map
+    if (totalScreens == 0) totalScreens = 1;
 
-    Serial.printf("Number of screens: %d\n", totalScreens);
+    writeLogln("Number of screens: " + String(totalScreens));
 
-    // Trigger explicit display initialization requirements flags
     needFullRedraw = true;
     
-    // Boot peripheral touch controller interface loops
     TouchInit();
 }
 
@@ -123,6 +113,7 @@ void loop()
         } else {
             // Default sequential layout iteration strategy fallback if unmapped
             CurrentScreen++;
+            Serial.println("Next screen");
             if (CurrentScreen > totalScreens) CurrentScreen = 1;
         }
         

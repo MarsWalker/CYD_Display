@@ -4,8 +4,11 @@
 
 #include <TFT_eSPI.h>
 #include <HTTPClient.h>   // For network JPG streaming/downloading
-#include <TJpg_Decoder.h> // For high-performance JPG decoding/rendering
+#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
 #include <SD.h>           // For fetching JPG assets from microSD storage
+#include <JPEGDEC.h> // For high-performance JPG decoding/rendering
+//#include <TJpg_Decoder.h> // For high-performance JPG decoding/rendering
 
 // External reference to the TFT display instance instantiated in the main application
 extern TFT_eSPI tft;
@@ -16,13 +19,21 @@ extern TFT_eSPI tft;
 // underlying rendering pipelines defined further down in this header file.
 // ============================================================================
 void DrawImage(int x, int y, const unsigned char* bitmap, int w, int h, uint16_t color, uint8_t zoom);
-void DrawJPG(int x, int y, String url);
+void DrawJPG(int x, int y, const String& url);
 void DrawJPGFromSD(int x, int y, String path);
 void DrawSmartImage(int x, int y, String source, uint16_t color, uint8_t zoom, bool isColorDefined = false);
+
+JPEGDEC jpeg;
 
 // ============================================================================
 // CORE GRAPHICS PRIMITIVES
 // ============================================================================
+
+int JPEGDraw(JPEGDRAW *pDraw)
+{
+    tft.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
+    return 1; // continuar a descodificar
+}
 
 /**
  * @brief Draws a single pixel at specified coordinates.
@@ -204,27 +215,63 @@ void DrawSmartImage(int x, int y, String source, uint16_t color, uint8_t zoom, b
  * @brief Streams and decodes JPEG raw binary image data directly out of local MicroSD cards.
  * @note Requires the hardware SD peripheral bus to be initialized prior to execution.
  */
+// ===========================================================
+// Funções de acesso a ficheiro para a JPEGDEC ler diretamente do SD
+// ===========================================================
+File jpegSdFile;
+
+void *jpegOpenSD(const char *filename, int32_t *size)
+{
+    jpegSdFile = SD.open(filename);
+    if (!jpegSdFile)
+        return nullptr;
+    *size = jpegSdFile.size();
+    return &jpegSdFile;
+}
+
+void jpegCloseSD(void *handle)
+{
+    if (jpegSdFile)
+        jpegSdFile.close();
+}
+
+int32_t jpegReadSD(JPEGFILE *pFile, uint8_t *buffer, int32_t length)
+{
+    if (!jpegSdFile)
+        return 0;
+    return jpegSdFile.read(buffer, length);
+}
+
+int32_t jpegSeekSD(JPEGFILE *pFile, int32_t position)
+{
+    if (!jpegSdFile)
+        return 0;
+    return jpegSdFile.seek(position) ? position : -1;
+}
+
 void DrawJPGFromSD(int x, int y, String path)
 {
     // Hardware asset presence verification sanity check
-    if (!SD.exists(path)) {
+    if (!SD.exists(path))
+    {
         Serial.printf("DrawJPGFromSD Error: File resource target not found at context path '%s'\n", path.c_str());
         return;
     }
 
-    // Prepare driver state structures for 16-bit Big-Endian/Little-Endian structural pixel byte swaps
-    tft.setSwapBytes(true);
-    
-    // Scale option targets: 1 = Normal size, 2 = 1/2 size, 4 = 1/4 size down-scaling passes
-    TJpgDec.setJpgScale(1);
-    
-    // Direct hardware streaming decompression directly out of file system pointers
-    TJpgDec.drawSdJpg(x, y, path.c_str());
-    
-    // Reset driver register flags to maintain drawing standard normalities across standard rendering pipelines
-    tft.setSwapBytes(false);
+    if (jpeg.open(path.c_str(), jpegOpenSD, jpegCloseSD, jpegReadSD, jpegSeekSD, JPEGDraw))
+    {
+        jpeg.setPixelType(RGB565_BIG_ENDIAN);
+        if (!jpeg.decode(x, y, 0))
+        {
+            Serial.printf("Erro na descodificação JPEG (SD): %d\n", jpeg.getLastError());
+        }
+        jpeg.close();
+    }
+    else
+    {
+        Serial.printf("DrawJPGFromSD Error: falha ao abrir '%s'\n", path.c_str());
+    }
 }
-
 /**
  * @brief Renders raw 1-bit monochome byte-packed bitmaps with integer scaling/zoom calculations.
  * @param bitmap Pointer to compile-time array assets residing natively inside PROGMEM Flash storage structures.
@@ -270,24 +317,6 @@ void DrawImage(
 }
 
 // ============================================================================
-// TJPG DECODER DRIVER CALLBACK INTERFACE
-// ============================================================================
-
-/**
- * @brief Mandatory driver level callback mechanism requested by the TJpg_Decoder rendering engines.
- * Pushes parsed block-matrices (Minimum Coding Units - MCUs) directly into display registers.
- */
-static bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
-{
-    // Terminate parser evaluations safely if block operations slip past the physical layout boundaries
-    if (y >= tft.height()) return false;
-    
-    // Direct hardware DMA or block transfer write operations execution pass
-    tft.pushImage(x, y, w, h, bitmap);
-    return true;
-}
-
-// ============================================================================
 // CLOUD NETWORK/HTTP STREAMING IMAGE ENGINE
 // ============================================================================
 
@@ -297,71 +326,139 @@ static bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* b
  * @warning Extreme caution is advised on devices with limited SRAM allocations (e.g., standard ESP32). 
  * Large images may trigger heap fragmentations or Fatal Out-Of-Memory Panic Crashes.
  */
-void DrawJPG(int x, int y, String url)
+
+void DrawJPG(int x, int y, const String &url)
 {
-    if (url == "") return;
+    if (url.isEmpty())
+        return;
 
+    String targetUrl = url;
     HTTPClient http;
-    http.begin(url);
-    http.setTimeout(3000); // Fail gracefully if network handshakes hang past 3 seconds
+    WiFiClientSecure clientSecure;
+    WiFiClient clientPlain;
+
+    Serial.printf("DrawJPG: %s | heap livre: %u\n", targetUrl.c_str(), ESP.getFreeHeap());
+
+    // --- PASSO 1: Detetar e seguir redirecionamentos manualmente ---
+    bool redirected = true;
+    int redirectCount = 0;
     
-    int httpCode = http.GET();
-    if (httpCode == HTTP_CODE_OK) {
-        int totalLen = http.getSize();
-        if (totalLen > 0) {
-            
-            // Dynamic heap allocation pass for complete payload binary data buffers
-            uint8_t* jpgBuffer = (uint8_t*)malloc(totalLen);
-            
-            if (jpgBuffer != NULL) {
-                WiFiClient* stream = http.getStreamPtr();
-                int bytesRead = 0;
-                
-                uint32_t startTime = millis();
-                const uint32_t DOWNLOAD_TIMEOUT = 5000; // Hard streaming safety threshold: 5 seconds
+    // Desativamos o follow automático para controlar a memória
+    http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+    http.setTimeout(5000);
 
-                // Active network read extraction data processing sequence loops
-                while (http.connected() && bytesRead < totalLen) {
-                    // Watchdog safety checks against connection drop freezes
-                    if (millis() - startTime > DOWNLOAD_TIMEOUT) {
-                        Serial.println("DrawJPG Error: Download streaming session timeout exceeded.");
-                        break;
-                    }
-                    
-                    size_t size = stream->available();
-                    if (size) {
-                        // Securely read incoming chunks into sequential positions inside the heap buffer array
-                        int c = stream->readBytes(&jpgBuffer[bytesRead], size);
-                        bytesRead += c;
-                        startTime = millis(); // Reset structural timeout tracking while data transactions remain ongoing
-                    }
-                    delay(1); // Small yields to allow system context operations to execute smoothly
-                }
-
-                // Integrity verification validation passes on downloaded network packets
-                if (bytesRead < totalLen) {
-                    Serial.printf("DrawJPG Error: Incomplete packet download stream (%d/%d bytes resolved)\n", bytesRead, totalLen);
-                    free(jpgBuffer); // Release heap allocations immediately to prevent memory leak states
-                    http.end();
-                    return;
-                }
-                
-                // Pipeline Execution: Execute image conversions from memory array block configurations
-                tft.setSwapBytes(true); 
-                TJpgDec.setJpgScale(1); 
-                TJpgDec.drawJpg(x, y, jpgBuffer, totalLen); // Decompress and dump directly onto the display via the callback function
-                tft.setSwapBytes(false);
-
-                // CRITICAL: Always release allocated memory buffers back into standard memory block pools!
-                free(jpgBuffer); 
-            } else {
-                Serial.println("DrawJPG Panic: Insufficient RAM available for dynamic JPG processing structures.");
-            }
+    while (redirected && redirectCount < 3) // Limite de 3 redirecionamentos
+    {
+        bool https = targetUrl.startsWith("https://");
+        if (https) {
+            clientSecure.setInsecure();
+            http.begin(clientSecure, targetUrl);
+        } else {
+            http.begin(clientPlain, targetUrl);
         }
-    } else {
-        Serial.printf("DrawJPG Error: HTTP Request execution failure occurred (Response Status Code: %d)\n", httpCode);
-    }
-    http.end(); // Safely terminate and close standard underlying sockets
-}
 
+        int httpCode = http.GET();
+        
+        // Se for redirecionamento (301, 302, 303, 307, 308)
+        if (httpCode >= 300 && httpCode >= 308) {
+            String newUrl = http.header("Location");
+            if (newUrl.isEmpty()) {
+                // Algumas APIs devolvem no formato normal de cabeçalhos, temos de pedir explicitamente
+                const char* headerKeys[] = {"Location"};
+                http.collectHeaders(headerKeys, 1);
+                // Refaz o GET para apanhar o header
+                httpCode = http.GET();
+                newUrl = http.header("Location");
+            }
+            
+            if (!newUrl.isEmpty()) {
+                Serial.printf("A redirecionar para: %s\n", newUrl.c_str());
+                targetUrl = newUrl;
+                redirectCount++;
+                http.end(); // Fecha a ligação anterior para libertar RAM antes da próxima
+            } else {
+                redirected = false;
+            }
+        } else {
+            redirected = false; // Não é redirecionamento, prossegue com o download
+        }
+    }
+
+    // --- PASSO 2: Fazer o download do destino final ---
+    // Reinicia a ligação se fechada no ciclo acima
+    if (!http.connected()) {
+        bool https = targetUrl.startsWith("https://");
+        if (https) {
+            clientSecure.setInsecure();
+            http.begin(clientSecure, targetUrl);
+        } else {
+            http.begin(clientPlain, targetUrl);
+        }
+        int httpCode = http.GET();
+        if (httpCode != HTTP_CODE_OK) {
+            Serial.printf("HTTP Error no destino final: %d (%s)\n", httpCode, http.errorToString(httpCode).c_str());
+            http.end();
+            return;
+        }
+    }
+
+    int totalLen = http.getSize();
+    if (totalLen <= 0)
+    {
+        Serial.println("Unknown content length.");
+        http.end();
+        return;
+    }
+
+    uint8_t *jpgBuffer = (uint8_t *)heap_caps_malloc(totalLen, MALLOC_CAP_SPIRAM);
+    if (!jpgBuffer)
+        jpgBuffer = (uint8_t *)malloc(totalLen);
+
+    if (!jpgBuffer)
+    {
+        Serial.printf("Out of memory (precisava de %d bytes, heap livre: %u)\n",
+                      totalLen, ESP.getFreeHeap());
+        http.end();
+        return;
+    }
+
+    WiFiClient *stream = http.getStreamPtr();
+    int bytesRead = 0;
+    while (http.connected() && bytesRead < totalLen)
+    {
+        int available = stream->available();
+        if (available > 0)
+        {
+            bytesRead += stream->readBytes(
+                jpgBuffer + bytesRead,
+                min(available, totalLen - bytesRead));
+        }
+        delay(1);
+    }
+
+    if (bytesRead == totalLen)
+    {
+        if (jpeg.openRAM(jpgBuffer, totalLen, JPEGDraw))
+        {
+            jpeg.setPixelType(RGB565_BIG_ENDIAN);
+            jpeg.setUserPointer(nullptr);
+            if (!jpeg.decode(x, y, 0))
+            {
+                Serial.printf("Erro na descodificação JPEG: %d\n", jpeg.getLastError());
+            }
+            jpeg.close();
+        }
+        else
+        {
+            Serial.println("openRAM falhou.");
+        }
+    }
+    else
+    {
+        Serial.printf("Incomplete download (%d/%d)\n", bytesRead, totalLen);
+    }
+
+    free(jpgBuffer);
+    http.end();
+}
 #endif // DRAW_H
