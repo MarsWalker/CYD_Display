@@ -1,4 +1,6 @@
-# CYD Display Dashboard (XPT2046)
+# CYD Display Dashboard 
+# Example uses XPT2046
+# Simple_Example.v2 uses a webpage to change the screen ( http://ip?screen=2 ) will change to the second screen
 
 This project allows you to easily configure and control generic **CYD (Cheap Yellow Display)** boards using dynamic JSON files. 
 It features WiFi connectivity, local Home Assistant integration, and an interactive touch interface using the XPT2046 controller.
