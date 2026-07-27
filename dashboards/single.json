@@ -38,8 +38,88 @@
 			"Number": 1,
 			"Refresh": 1000,
 			"Objects": [
-				{ "Type": "FillScreen" },
-				{ "Type": "DrawText", "Text": "Ola", "X": 10, "Y": 10 }
+				"Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "_Type": "DrawText",
+          "X": 10,
+          "Y": 10,
+          "Text": "RELOGIO",
+          "Font": 4,
+          "Color": "Green"
+        },
+        {
+          "Type": "DrawText",
+          "X": 5,
+          "Y": 5,
+          "Text": "function:Clock",
+          "Font": 4,
+          "Color": "white"
+        },
+		{
+		  "Type": "DrawText",
+		  "X": 40,
+		  "Y": 75,
+		  "Font": 2,
+		  "Color": "White",
+		  "Text": "datasource:weather_santo_tirso:codeText"
+		},
+		{
+		  "Type": "DrawImage",
+		  "X": 10,
+		  "Y": 70,
+		  "Zoom": 1,
+		  "Image": "datasource:weather_santo_tirso:code_image",
+		  "Color": "White"
+		},
+		{
+		  "Type": "DrawText",
+		  "X": 10,
+		  "Y": 100,
+		  "Text": "datasource:weather_santo_tirso:temperature",
+		  "Preffix": "Temp:",
+		  "Suffix": " ºC",
+		  "Font": 4,
+		  "Color": "Yellow"
+		},
+		{
+		  "Type": "DrawText",
+		  "X": 10,
+		  "Y": 130,
+		  "Text": "datasource:weather_santo_tirso:humidity",
+		  "Preffix": "Humidade: ",
+		  "Suffix": " Ha",
+		  "Font": 2,
+		  "Color": "Green"
+		},
+        {
+          "Type": "DrawImageBool",
+          "X": 290,
+          "Y": 5,
+          "Value": "function:IsWIFIConnected",
+          "true": "DrawImage:wifi_on",
+          "false": "DrawImage:wifi_off"
+        },
+        {
+          "Type": "DrawText",
+          "X": 20,
+          "Y": 160,
+          "Text": "IP:",
+          "Font": 2,
+          "Color": "Magenta"
+        },
+        {
+          "Type": "DrawText",
+          "X": 50,
+          "Y": 160,
+          "Text": "function:MyIP",
+          "Font": 2,
+          "Color": "White"
+        }
+				
 			]
 		}
 	]
