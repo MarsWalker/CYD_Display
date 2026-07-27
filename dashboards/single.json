@@ -43,14 +43,6 @@
           "Color": "Black"
         },
         {
-          "_Type": "DrawText",
-          "X": 10,
-          "Y": 10,
-          "Text": "RELOGIO",
-          "Font": 4,
-          "Color": "Green"
-        },
-        {
           "Type": "DrawText",
           "X": 5,
           "Y": 5,
@@ -84,24 +76,6 @@
 		  "Font": 4,
 		  "Color": "Yellow"
 		},
-		{
-		  "Type": "DrawText",
-		  "X": 10,
-		  "Y": 130,
-		  "Text": "datasource:weather_santo_tirso:humidity",
-		  "Preffix": "Humidade: ",
-		  "Suffix": " Ha",
-		  "Font": 2,
-		  "Color": "Green"
-		},
-        {
-          "Type": "DrawImageBool",
-          "X": 290,
-          "Y": 5,
-          "Value": "function:IsWIFIConnected",
-          "true": "DrawImage:wifi_on",
-          "false": "DrawImage:wifi_off"
-        },
         {
           "Type": "DrawText",
           "X": 20,
