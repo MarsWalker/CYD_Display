@@ -38,7 +38,6 @@
 			"Number": 1,
 			"Refresh": 1000,
 			"Objects": [
-				"Objects": [
         {
           "Type": "FillScreen",
           "Color": "Black"
