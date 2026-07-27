@@ -36,7 +36,6 @@
 			"Invert": true,
 			"Rotation": 1,
 			"Number": 1,
-			"Name": "mainSimple",
 			"Refresh": 1000,
 			"Objects": [
 				{ "Type": "FillScreen" },
