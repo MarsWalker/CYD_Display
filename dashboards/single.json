@@ -72,7 +72,7 @@
 		  "Y": 100,
 		  "Text": "datasource:weather_santo_tirso:temperature",
 		  "Preffix": "Temp:",
-		  "Suffix": " ºC",
+		  "Suffix": " C",
 		  "Font": 4,
 		  "Color": "Yellow"
 		},
