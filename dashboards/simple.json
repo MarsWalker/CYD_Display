@@ -1,0 +1,199 @@
+{
+	"TIMEZONE": "Europe/Lisbon",
+	"Log":
+	{
+		"Weather": false,
+		"HA": false
+	},
+	"DataSources": [
+		{
+			"Type": "Weather",
+			"Id": "weather_aveiro",
+			"Refresh": 600000,
+			"url": "https://api.open-meteo.com/v1/forecast?latitude=41.343&longitude=-8.477&current=temperature_2m,relative_humidity_2m,pressure_msl,weather_code,wind_speed_10m",
+			"Map":
+			{
+				"temperature": "current.temperature_2m",
+				"humidity": "current.relative_humidity_2m",
+				"pressure": "current.pressure_msl",
+				"wind": "current.wind_speed_10m",
+				"code": "current.weather_code"
+			},
+			"Codes":
+			{
+				"0":  { "label": "Ceu limpo",             "image": "sun",          "url": "https://..." },
+				"1":  { "label": "Maioritariamente limpo", "image": "sun",          "url": "https://..." },
+				"2":  { "label": "Parcialmente nublado",   "image": "cloud_sun",    "url": "https://..." },
+				"3":  { "label": "Nublado",                "image": "cloud",        "url": "https://..." },
+				"45": { "label": "Nevoeiro",               "image": "fog",          "url": "https://..." },
+				"48": { "label": "Nevoeiro",               "image": "fog",          "url": "https://..." },
+				"61": { "label": "Chuva fraca",            "image": "rain_light",   "url": "https://..." },
+				"63": { "label": "Chuva moderada",         "image": "rain",         "url": "https://..." },
+				"65": { "label": "Chuva forte",            "image": "rain_heavy",   "url": "https://..." },
+				"80": { "label": "Aguaceiros fracos",      "image": "shower_light", "url": "https://..." },
+				"81": { "label": "Aguaceiros moderados",   "image": "shower",       "url": "https://..." },
+				"82": { "label": "Aguaceiros fortes",      "image": "shower_heavy", "url": "https://..." },
+				"95": { "label": "Trovoada",               "image": "storm",        "url": "https://..." }
+			}
+		},
+		{
+			"Type": "HA",
+			"Id": "doors",
+			"Refresh": 5000,
+			"Entities": [
+				"binary_sensor.porta_entrada",
+				"binary_sensor.porta_cozinha",
+				"binary_sensor.porta_alcapao",
+				"binary_sensor.porta_centro",
+				"binary_sensor.porta_cozinha_cave",
+				"binary_sensor.porta_oficina"
+			]
+		},
+		{
+			"Type": "HA",
+			"Id": "people",
+			"Refresh": 5000,
+			"Entities": [
+				"binary_sensor.pessoas_escada",
+				"binary_sensor.pessoas_cozinha_cave",
+				"binary_sensor.pessoas_na_salinha",
+				"binary_sensor.pessoas_na_oficina"
+			]
+		}
+	],
+	"Screens": [
+		{
+			"Invert": true,
+			"Rotation": 1,
+			"Number": 1,
+			"Refresh": 1000,
+			"Objects": [
+				{
+					"Type": "FillScreen",
+					"Color": "Black"
+				},
+				{
+					"Type": "DrawText",
+					"X": 5,
+					"Y": 5,
+					"Text": "function:Clock",
+					"Font": 4,
+					"Color": "white"
+				},
+				{
+					"Type": "DrawHASensorMultiSensor",
+					"IconX": 255,
+					"IconY": 5,
+					"entity": "binary_sensor.porta_entrada,binary_sensor.porta_cozinha,binary_sensor.porta_alcapao,binary_sensor.porta_centro,binary_sensor.porta_cozinha_cave,binary_sensor.porta_oficina",
+					"state:on": "DrawImage:door_open",
+					"state:open": "DrawImage:door_open",
+					"state:detected": "DrawImage:door_open",
+					"else": "DrawImage:door_closed",
+					"state:": "DrawImage:warning",
+					"Font": 2,
+					"Color": "White",
+					"X": 250,
+					"Y": 40,
+					"Text": "Portas"
+				},
+				{
+					"Type": "Touch",
+					"TouchX1": 255,
+					"TouchY1": 5,
+					"TouchX2": 280,
+					"TouchY2": 50,
+					"TouchAction": "goto:2"
+				},
+				{
+					"Type": "DrawHASensorMultiSensor",
+					"IconX": 205,
+					"IconY": 5,
+					"entity": "binary_sensor.pessoas_escada,binary_sensor.pessoas_cozinha_cave,binary_sensor.pessoas_na_salinha,binary_sensor.pessoas_na_oficina",
+					"state:on": "DrawImage:person_on",
+					"state:open": "DrawImage:person_on",
+					"state:detected": "DrawImage:person_on",
+					"else": "DrawImage:person_off",
+					"state:": "DrawImage:warning",
+					"Font": 2,
+					"Color": "White",
+					"X": 200,
+					"Y": 40,
+					"Text": "People"
+				},
+				{
+					"Type": "DrawText",
+					"X": 40,
+					"Y": 75,
+					"Font": 2,
+					"Color": "White",
+					"Text": "datasource:weather_aveiro:codeText"
+				},
+				{
+					"Type": "DrawImage",
+					"X": 10,
+					"Y": 70,
+					"Zoom": 1,
+					"Image": "datasource:weather_aveiro:code_image",
+					"Color": "White"
+				},
+				{
+					"Type": "DrawText",
+					"X": 10,
+					"Y": 100,
+					"Text": "datasource:weather_aveiro:temperature",
+					"Preffix": "Temp: ",
+					"Suffix": " ºC",
+					"Font": 4,
+					"Color": "Yellow"
+				},
+				{
+					"Type": "DrawText",
+					"X": 10,
+					"Y": 130,
+					"Text": "datasource:weather_aveiro:humidity",
+					"Preffix": "Humidade: ",
+					"Suffix": " Ha",
+					"Font": 2,
+					"Color": "Green"
+				},
+				{
+					"Type": "DrawImageBool",
+					"X": 290,
+					"Y": 5,
+					"Value": "function:IsWIFIConnected",
+					"true": "DrawImage:wifi_on",
+					"false": "DrawImage:wifi_off"
+				},
+				{
+					"Type": "DrawText",
+					"X": 20,
+					"Y": 160,
+					"Text": "IP:",
+					"Font": 2,
+					"Color": "Magenta"
+				},
+				{
+					"Type": "DrawText",
+					"X": 50,
+					"Y": 160,
+					"Text": "function:MyIP",
+					"Font": 2,
+					"Color": "White"
+				},
+				{
+					"Type": "DrawText",
+					"X": 200,
+					"Y": 200,
+					"TouchX1": 255,
+					"TouchY1": 215,
+					"TouchX2": 320,
+					"TouchY2": 240,
+					"TouchAction": "goto:3",
+					"Text": "Toca -> ecra 3",
+					"Font": 1,
+					"Color": "DarkGrey"
+				}
+			]
+		}
+	]
+}

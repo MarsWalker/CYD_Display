@@ -9,7 +9,9 @@
 		  "Type": "DrawJPG",
 		  "X": 0,
 		  "Y": 0,
-		  "URL": "https://picsum.photos/320/200"
+		  "InvertBytes": "true",
+		  "Scale": 1,
+		  "URL": "http://raspi2.lan/HA/ninos.jpg"
 		}
       ]
 }

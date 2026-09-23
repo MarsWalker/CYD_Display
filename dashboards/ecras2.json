@@ -1,4 +1,162 @@
 {
+	"DataSources": [
+	{
+	  "Type": "Weather",
+	  "Id": "weather_aveiro",
+	  "Refresh": 600000,
+	  "url": "https://api.open-meteo.com/v1/forecast?latitude=41.343&longitude=-8.477&current=temperature_2m,relative_humidity_2m,pressure_msl,weather_code,wind_speed_10m",
+	  "Map": {
+		"temperature": "current.temperature_2m",
+		"humidity": "current.relative_humidity_2m",
+		"pressure": "current.pressure_msl",
+		"wind": "current.wind_speed_10m",
+		"code": "current.weather_code"
+	  }
+	}
+	],
+	"Screens": [
+    {
+      "Number": 1,
+      "Refresh": 1000,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "_Type": "DrawText",
+          "X": 10,
+          "Y": 10,
+          "Text": "RELOGIO",
+          "Font": 4,
+          "Color": "Green"
+        },
+        {
+          "Type": "DrawText",
+          "X": 5,
+          "Y": 5,
+          "Text": "function:Clock",
+          "Font": 4,
+          "Color": "white"
+        },
+        {
+          "Type": "DrawHASensorMultiSensor",
+          "IconX": 255,
+          "IconY": 5,
+		  "TouchX1": 255, 
+		  "TouchY1": 5,
+		  "TouchX2": 280, 
+		  "TouchY2": 29,
+		  "TouchAction": "goto:2",
+          "entity": "binary_sensor.porta_cozinha_contact,binary_sensor.porta_centro_cave_contact,binary_sensor.porta_entrada_contact,binary_sensor.porta_cozinha_cave_contact,binary_sensor.porta_oficina_cave_contact",
+          "state:on": "DrawImage:door_open",
+          "state:open": "DrawImage:door_open",
+          "state:detected": "DrawImage:door_open",
+          "else": "DrawImage:door_closed",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 250,
+          "Y": 40,
+          "Text": "Portas"
+        },
+        {
+          "Type": "DrawHASensorMultiSensor",
+          "IconX": 205,
+          "IconY": 5,
+		  "TouchX1": 205, 
+		  "TouchY1": 5,
+		  "TouchX2": 250, 
+		  "TouchY2": 29,
+		  "TouchAction": "goto:2",
+          "entity": "binary_sensor.pessoas_pc_occupancy,binary_sensor.pessoas_salinha_presence,binary_sensor.pessoas_sala_presence,binary_sensor.pessoas_escada_presence,binary_sensor.pessoas_wc_presence,binary_sensor.pessoas_escada_presence,binary_sensor.pessoas_cozinha_cave_presence,binary_sensor.pessoas_pir_centro_occupancy,binary_sensor.pessoas_pir_oficina_occupancy",
+          "state:on": "DrawImage:person_on",
+          "state:open": "DrawImage:person_on",
+          "state:detected": "DrawImage:person_on",
+          "else": "DrawImage:person_off",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 200,
+          "Y": 40,
+          "Text": "People"
+        },
+		{
+		  "Type": "DrawText",
+		  "X": 100,
+		  "Y": 70,
+		  "Font": 2,
+		  "Color": "White",
+		  "Text": "datasource:weather_aveiro:code"
+		},
+		{
+		  "Type": "DrawImage",
+		  "X": 10,
+		  "Y": 70,
+		  "Image": "datasource:weather_aveiro:code_image",
+		  "Color": "White"
+		},
+		{
+		  "Type": "DrawText",
+		  "X": 10,
+		  "Y": 100,
+		  "Text": "datasource:weather_aveiro:temperature",
+		  "Preffix": "Temp:",
+		  "Suffix": " ºC",
+		  "Font": 4,
+		  "Color": "Yellow"
+		},
+		{
+		  "Type": "DrawText",
+		  "X": 10,
+		  "Y": 130,
+		  "Text": "datasource:weather_aveiro:humidity",
+		  "Preffix": "Hum:",
+		  "Suffix": " Ha",
+		  "Font": 4,
+		  "Color": "Yellow"
+		},
+        {
+          "Type": "DrawImageBool",
+          "X": 290,
+          "Y": 5,
+          "Value": "function:IsWIFIConnected",
+          "true": "DrawImage:wifi_on",
+          "false": "DrawImage:wifi_off"
+        },
+        {
+          "Type": "DrawText",
+          "X": 20,
+          "Y": 160,
+          "Text": "IP:",
+          "Font": 2,
+          "Color": "Magenta"
+        },
+        {
+          "Type": "DrawText",
+          "X": 50,
+          "Y": 160,
+          "Text": "function:MyIP",
+          "Font": 2,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawText",
+          "X": 200,
+          "Y": 200,
+		  "TouchX1": 255, 
+		  "TouchY1": 215,
+		  "TouchX2": 320, 
+		  "TouchY2": 240,
+		  "TouchAction": "goto:3",
+          "Text": "Toca -> ecra 3",
+          "Font": 1,
+          "Color": "DarkGrey"
+        }
+      ]
+    },
+    {
+      "Number": 2,
       "Refresh": 3000,
       "Objects": [
         {
@@ -176,4 +334,29 @@
           "Text": "PIR Centro"
         }
       ]
+    },
+    {
+      "Number": 3,
+      "Refresh": 30000,
+      "Objects": 
+		[
+			{
+			  "Type": "FillScreen",
+			  "Color": "Black"
+			},
+			{
+			  "Type": "DrawJPG",
+			  "X": 0,
+			  "Y": 0,
+			  "URL": "http://raspi2.lan/HA/ninos.jpg"
+			},
+			{
+			  "Type": "DrawImage",
+			  "X": 60,
+			  "Y": 70,
+			  "Image": "heart"
+			}
+		]
+	}
+  ]
 }

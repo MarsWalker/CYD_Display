@@ -63,7 +63,7 @@
         },
 		{
 		  "Type": "DrawText",
-		  "X": 40,
+		  "X": 60,
 		  "Y": 75,
 		  "Font": 2,
 		  "Color": "White",
@@ -72,8 +72,8 @@
 		{
 		  "Type": "DrawImage",
 		  "X": 10,
-		  "Y": 70,
-		  "Zoom": 1,
+		  "Y": 60,
+		  "Zoom": 2,
 		  "Image": "datasource:weather_aveiro:code_image",
 		  "Color": "White"
 		},

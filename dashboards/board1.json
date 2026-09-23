@@ -1,16 +1,11 @@
 {
-	"Log":
-	{
-		"Weather": true,
-		"HA": false
-	},
 	"DataSources": [
 		{
 			"Type": "Weather",
 			"Id": "weather_aveiro",
 			"Refresh": 600000,
 			"url": "https://api.open-meteo.com/v1/forecast?latitude=41.343&longitude=-8.477&current=temperature_2m,relative_humidity_2m,pressure_msl,weather_code,wind_speed_10m",
-			"Map":
+			"Map": 
 			{
 				"temperature": "current.temperature_2m",
 				"humidity": "current.relative_humidity_2m",
@@ -18,7 +13,7 @@
 				"wind": "current.wind_speed_10m",
 				"code": "current.weather_code"
 			},
-			"Codes":
+			"Codes": 
 			{
 				"0":  { "label": "Ceu limpo",             "image": "sun",          "url": "https://..." },
 				"1":  { "label": "Maioritariamente limpo", "image": "sun",          "url": "https://..." },
@@ -34,30 +29,6 @@
 				"82": { "label": "Aguaceiros fortes",      "image": "shower_heavy", "url": "https://..." },
 				"95": { "label": "Trovoada",               "image": "storm",        "url": "https://..." }
 			}
-		},
-		{
-			"Type": "HA",
-			"Id": "doors",
-			"Refresh": 5000,
-			"Entities": [
-				"binary_sensor.porta_entrada",
-				"binary_sensor.porta_cozinha",
-				"binary_sensor.porta_alcapao",
-				"binary_sensor.porta_centro",
-				"binary_sensor.porta_cozinha_cave",
-				"binary_sensor.porta_oficina"
-			]
-		},
-		{
-			"Type": "HA",
-			"Id": "people",
-			"Refresh": 5000,
-			"Entities": [
-				"binary_sensor.pessoas_escada",
-				"binary_sensor.pessoas_cozinha_cave",
-				"binary_sensor.pessoas_na_salinha",
-				"binary_sensor.pessoas_na_oficina"
-			]
 		}
 	],
 	"Screens": [
