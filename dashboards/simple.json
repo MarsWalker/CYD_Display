@@ -1,5 +1,6 @@
 {
 	"TIMEZONE": "Europe/Lisbon",
+	"touchEnable": true,
 	"Log":
 	{
 		"Weather": false,
