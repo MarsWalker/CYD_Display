@@ -82,6 +82,14 @@
 					"Color": "white"
 				},
 				{
+					"Type": "DrawText",
+					"X": 40,
+					"Y": 75,
+					"Font": 2,
+					"Color": "White",
+					"Text": "datasource:weather_aveiro:codeText"
+				},
+				{
 					"Type": "DrawImage",
 					"X": 10,
 					"Y": 70,
