@@ -1,0 +1,18 @@
+# Credentials — NEVER commit the real data
+secrets.h
+secrets.json
+
+# Template is committed so people know what to fill in
+!secrets_template.h
+
+# Build artifacts
+build/
+build_out/
+
+# Backups / personal history
+backup_*.tar.gz
+brain.md
+
+# Editor / OS
+*.swp
+.DS_Store
