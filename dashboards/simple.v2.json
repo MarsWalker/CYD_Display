@@ -82,54 +82,6 @@
 					"Color": "white"
 				},
 				{
-					"Type": "DrawHASensorMultiSensor",
-					"IconX": 255,
-					"IconY": 5,
-					"entity": "binary_sensor.porta_entrada,binary_sensor.porta_cozinha,binary_sensor.porta_alcapao,binary_sensor.porta_centro,binary_sensor.porta_cozinha_cave,binary_sensor.porta_oficina",
-					"state:on": "DrawImage:door_open",
-					"state:open": "DrawImage:door_open",
-					"state:detected": "DrawImage:door_open",
-					"else": "DrawImage:door_closed",
-					"state:": "DrawImage:warning",
-					"Font": 2,
-					"Color": "White",
-					"X": 250,
-					"Y": 40,
-					"Text": "Portas"
-				},
-				{
-					"Type": "Touch",
-					"TouchX1": 255,
-					"TouchY1": 5,
-					"TouchX2": 280,
-					"TouchY2": 50,
-					"TouchAction": "goto:2"
-				},
-				{
-					"Type": "DrawHASensorMultiSensor",
-					"IconX": 205,
-					"IconY": 5,
-					"entity": "binary_sensor.pessoas_escada,binary_sensor.pessoas_cozinha_cave,binary_sensor.pessoas_na_salinha,binary_sensor.pessoas_na_oficina",
-					"state:on": "DrawImage:person_on",
-					"state:open": "DrawImage:person_on",
-					"state:detected": "DrawImage:person_on",
-					"else": "DrawImage:person_off",
-					"state:": "DrawImage:warning",
-					"Font": 2,
-					"Color": "White",
-					"X": 200,
-					"Y": 40,
-					"Text": "People"
-				},
-				{
-					"Type": "DrawText",
-					"X": 40,
-					"Y": 75,
-					"Font": 2,
-					"Color": "White",
-					"Text": "datasource:weather_aveiro:codeText"
-				},
-				{
 					"Type": "DrawImage",
 					"X": 10,
 					"Y": 70,
@@ -180,19 +132,6 @@
 					"Text": "function:MyIP",
 					"Font": 2,
 					"Color": "White"
-				},
-				{
-					"Type": "DrawText",
-					"X": 200,
-					"Y": 200,
-					"TouchX1": 255,
-					"TouchY1": 215,
-					"TouchX2": 320,
-					"TouchY2": 240,
-					"TouchAction": "goto:3",
-					"Text": "Toca -> ecra 3",
-					"Font": 1,
-					"Color": "DarkGrey"
 				}
 			]
 		}
