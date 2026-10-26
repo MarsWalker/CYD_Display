@@ -286,7 +286,10 @@
           "X": 10,
           "Y": 100,
           "Width": 178,
-          "Height": 90
+          "Height": 90,
+          "Background": "0x0861",
+          "PositiveColor": "Yellow",
+          "NegativeColor": "Green"
         },
         {
           "Type": "DrawText",
