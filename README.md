@@ -9,6 +9,12 @@ The current firmware is **dashIDE002.1**, prepared for **Arduino IDE 2.x** on
 Windows and Linux. A Python selector configures one of four hardware profiles,
 using either a graphical interface or the command line.
 
+## Example result
+
+One of the finished dashboards, using the `simple.v5.json` layout:
+
+![CYD Display running the simple.v5 dashboard](https://raw.githubusercontent.com/MarsWalker/CYD_Display/main/images/simple.v5.jpg)
+
 ## Repository guide
 
 | Location | Contents |
