@@ -1,8 +1,8 @@
-# DataSources do dash001.4
+# DataSources do dash001.5
 
 O JSON da board define **o que consultar** em `DataSources` e **onde mostrar**
 em `Screens[].Objects`. Declarar uma fonte não cria objetos no ecrã.
-Os tipos implementados são `Weather`, `HA` e `Ping`.
+Os tipos implementados são `Weather`, `HA`, `Ping` e `Power`.
 
 Os exemplos abaixo são fragmentos JSON válidos: os arrays de fontes entram em
 `DataSources` e os arrays de objetos em `Screens[].Objects`. Ao combinar
@@ -11,15 +11,15 @@ Os nomes e as maiúsculas das chaves devem seguir os exemplos.
 
 ## Estrutura de uma board
 
-Exemplo completo e utilizável com um ping:
+Exemplo completo e utilizável com o gráfico da casa:
 
 ```json
 {
   "TIMEZONE": "Europe/Lisbon",
   "touchEnable": true,
-  "Log": {"Weather": false, "HA": false, "Ping": false},
+  "Log": {"Weather": false, "HA": false, "Power": false},
   "DataSources": [
-    {"Type": "Ping", "Id": "server1", "Host": "192.168.1.204", "Refresh": 10000}
+    {"Type": "Power", "Id": "casa", "Entity": "sensor.energia_pj2101a_local_power", "Unit": "W", "Refresh": 2000}
   ],
   "Screens": [
     {
@@ -30,7 +30,8 @@ Exemplo completo e utilizável com um ping:
       "Objects": [
         {"Type": "FillScreen", "Color": "Black"},
         {"Type": "DrawText", "X": 10, "Y": 10, "Text": "function:Clock", "Font": 4, "Color": "White"},
-        {"Type": "DrawText", "X": 10, "Y": 100, "Text": "ping:server1", "Prefix": "192.168.1.204 ", "Font": 2, "Color": "White"}
+        {"Type": "DrawPowerGraph", "Source": "casa", "X": 10, "Y": 100, "Width": 178, "Height": 90},
+        {"Type": "DrawText", "X": 10, "Y": 196, "Text": "power:casa", "Prefix": "Casa:", "Suffix": "W", "Font": 2}
       ]
     }
   ]
@@ -45,7 +46,8 @@ As fontes são globais à board, mesmo quando se muda de ecrã.
 As posições são em píxeis, a partir do canto superior esquerdo, sem escalamento
 automático. `Rotation: 1` dá 320×240 nas amarelas/pink e 480×320 na black.
 Os exemplos são peças de layout: ajustar posições ao juntá-los para evitar
-sobreposição. O `simple.v4.json` atual já tem os pings no lugar dos sensores da sala.
+sobreposição. O `simple.v5.json` atual mostra o gráfico no lugar dos pings e apenas o valor
+da casa por baixo. Não declara pings nem os sensores da sala.
 
 ## Fontes disponíveis no projeto
 
@@ -55,12 +57,14 @@ sobreposição. O `simple.v4.json` atual já tem os pings no lugar dos sensores 
 | `doors` | HA | Seis portas | `DrawHASensor` com `entity` |
 | `people` | HA | Quatro sensores de presença | `DrawHASensor` com `entity` |
 | `sala` | HA | Temperatura, humidade e luminosidade | `entity:sensor...` em `DrawText` |
+| `casa` | Power | Potência e histórico da casa | `DrawPowerGraph` e `power:casa` |
 | `server1` | Ping | `192.168.1.204` | `ping:server1` |
 | `server2` | Ping | `192.168.1.75` | `ping:server2` |
 | `server3` | Ping | `192.168.1.79` | `ping:server3` |
 
-A fonte `sala` está documentada para reutilização; foi retirada do
-`simple.v4.json` a pedido do utilizador. Os nomes `Id` podem ser alterados,
+A fonte `sala` está documentada para reutilização; não faz parte do
+`simple.v5.json`. As fontes `server1`, `server2` e `server3` são exemplos
+herdados do v4 e também não fazem parte do v5. Os nomes `Id` podem ser alterados,
 desde que se atualizem as referências correspondentes.
 
 ## Weather — meteorologia
@@ -244,8 +248,8 @@ E estes objetos em `Screens[].Objects`:
 ]
 ```
 
-Estas posições são as mesmas que os pings ocupam agora: mover os pings ou
-substituir os respetivos objetos ao recuperar a sala. `Prefix` é a grafia
+Estas posições sobrepõem-se ao gráfico atual: mover o gráfico ou
+substituir os seus objetos ao recuperar a sala. `Prefix` é a grafia
 recomendada; a grafia histórica `Preffix` também é aceite.
 
 Os valores são apresentados como vêm do HA, sem arredondamento nem leitura
@@ -254,7 +258,81 @@ automática da unidade. `Prefix`/`Suffix` compõem o texto. Estados vazios,
 Se um pedido HTTP falhar, o cache HA pode manter o último estado recebido;
 o texto não é um indicador de atualidade da leitura.
 
-## Ping — disponibilidade dos servidores
+## Power — gráfico de potência da casa
+
+O `simple.v5.json` usa esta fonte para consultar o mesmo sensor da Raspi:
+
+```json
+[
+  {
+    "Type": "Power",
+    "Id": "casa",
+    "Entity": "sensor.energia_pj2101a_local_power",
+    "Unit": "W",
+    "Refresh": 2000
+  }
+]
+```
+
+`Power` consulta o Home Assistant com os mesmos `HA_URL` e `HA_TOKEN` das
+fontes HA. Não é preciso declarar a entidade também num grupo `HA`.
+`Entity` é obrigatório (até 63 bytes); `Id` até 31 bytes. Existe uma fonte
+Power por board, partilhada pelos ecrãs. `Unit` aceita `W` ou `kW`: kW são
+convertidos para W antes de guardar, desenhar e apresentar o valor.
+
+`Refresh` é o intervalo mínimo entre o fim de uma tentativa de consulta e
+a seguinte: default 2000 ms, limitado a 2000..3600000 ms. A execução das outras
+fontes e pedidos HTTP pode prolongar o intervalo real. A consulta corre na
+tarefa de dados existente, com timeout HTTP de 3 segundos. Não é criada uma
+tarefa adicional para o gráfico.
+
+### Mostrar o gráfico e o valor por baixo
+
+```json
+[
+  {"Type": "DrawPowerGraph", "Source": "casa", "X": 10, "Y": 100, "Width": 178, "Height": 90},
+  {"Type": "DrawText", "X": 10, "Y": 196, "Text": "power:casa", "Prefix": "Casa:", "Suffix": "W", "Font": 2}
+]
+```
+
+- `Source` é o Id da fonte Power. `Width`/`Height` incluem o rebordo; defaults
+  178×90. É necessário um espaço de pelo menos 64×40. O desenho é limitado às
+  margens físicas do ecrã; coordenadas negativas ou espaço insuficiente não
+  são desenhados.
+- Janela fixa dos últimos **5 minutos**, com a amostra mais recente à direita
+  e posições horizontais calculadas pelos tempos reais. No início o histórico
+  vai preenchendo o lado direito. São guardadas até 151 amostras, incluindo
+  timestamp e potência: cerca de 1,2 KB, mais a configuração, no heap.
+- O eixo vertical mostra o **módulo da potência**: mínimo sempre **0 W**;
+  máximo = maior valor absoluto ainda na janela + `max(5 W, 5%)`.
+  Exemplo: pico de -800 W → máximo 840; pico de +50 W → máximo 55.
+  Quando um pico sai da janela, o máximo pode voltar a diminuir.
+- Negativo: **verde vivo**; zero ou positivo: **amarelo**. Na mudança de sinal,
+  interpola-se o ponto de passagem por zero na base e muda-se aí a cor.
+  Um segmento negativo que termina ou começa em zero continua verde,
+  como no Python da Raspi.
+- Sem histórico: máximo 100, mínimo 0 W. Com amostras válidas apenas a zero:
+  máximo 5. Com menos de duas amostras mostra `aguarda...`.
+- `power:casa` apresenta a última potência válida em W, truncada para inteiro,
+  por exemplo `Casa:-382W`. Prefixo e valor recebem a cor do sinal, tal como
+  na Raspi, independentemente do campo `Color`. Antes da primeira leitura
+  mostra `Casa:--W` em branco.
+- Estados vazios, `unknown`, `unavailable`, valores não numéricos, NaN/Inf e
+  falhas HTTP não acrescentam amostras e mantêm o último valor válido.
+  Aceitam-se valores absolutos até 1 000 000 000 W. O gráfico envelhece as
+  amostras, mas o texto mantém a última leitura válida, como a Raspi; uma linha
+  pode ligar leituras válidas separadas por uma falha temporária.
+- Mudar de ecrã conserva o histórico; reiniciar ou recarregar o JSON limpa-o.
+  O histórico não é gravado em SD/flash. O gráfico desenha diretamente no
+  painel, sem framebuffer e sem biblioteca gráfica adicional.
+
+Para diagnóstico, ativar `Log.Power=true`: regista valor, número de amostras,
+heap livre e falhas de leitura. Os restantes logs podem ficar desligados.
+
+## Ping — disponibilidade dos servidores (opcional, herdado do v4)
+
+O firmware mantém suporte a Ping, mas o simple.v5.json não usa estas fontes.
+Os exemplos seguintes são alternativas ao gráfico na mesma zona.
 
 ### Definir as fontes
 
@@ -330,7 +408,7 @@ implementado.
 Para diagnosticar consultas, usar este objeto na raiz:
 
 ```json
-{"Log": {"Weather": true, "HA": true, "Ping": true}}
+{"Log": {"Weather": true, "HA": true, "Ping": true, "Power": true}}
 ```
 
 As flags Weather/HA controlam também os logs HTTP dessas fontes. Ping regista
@@ -342,6 +420,8 @@ Limites atuais do firmware:
 | --- | --- |
 | Fontes Weather/HA em conjunto | 16 |
 | Fontes Ping | 8 |
+| Fontes Power | 1 |
+| Histórico Power | 151 amostras / 5 minutos |
 | Entidades HA consultadas por grupo | 12 |
 | Lista de entidades por grupo | 511 bytes, incluindo vírgulas |
 | Entidades HA distintas no cache global | 40 |
@@ -361,7 +441,8 @@ em `JSON_FILE`. Os overrides do SD em `/secrets.json` podem mudar essa seleção
 O ficheiro no SD tem prioridade sobre a rede. Depois usar
 `http://<ip-da-board>/?reload=true` para reler o layout e as fontes.
 Alterações só a este JSON não exigem recompilar o firmware, desde que a board
-já tenha o dash001.4 para suportar Ping.
+já tenha o dash001.4 para Ping ou o dash001.5 para Power/gráfico.
 
 Referências de implementação: `datasources.h`, `datacache.h`, `functions.h`,
-`ping_sources.h`, `objects.h` e `draw.h`.
+`ping_sources.h`, `power_source.h`, `power_history.h`, `power_plot.h`,
+`objects.h` e `draw.h`.
