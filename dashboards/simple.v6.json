@@ -1,0 +1,369 @@
+{
+  "TIMEZONE": "Europe/Lisbon",
+  "touchEnable": true,
+  "Log": {
+    "Weather": false,
+    "HA": false,
+    "Power": false
+  },
+  "DataSources": [
+    {
+      "Type": "Weather",
+      "Id": "weather_aveiro",
+      "Refresh": 600000,
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=41.343&longitude=-8.477&current=temperature_2m,relative_humidity_2m,pressure_msl,weather_code,wind_speed_10m",
+      "Map": {
+        "temperature": "current.temperature_2m",
+        "humidity": "current.relative_humidity_2m",
+        "pressure": "current.pressure_msl",
+        "wind": "current.wind_speed_10m",
+        "code": "current.weather_code"
+      },
+      "Codes": {
+        "0": {
+          "label": "Ceu limpo",
+          "image": "sun",
+          "url": "https://..."
+        },
+        "1": {
+          "label": "Maioritariamente limpo",
+          "image": "sun",
+          "url": "https://..."
+        },
+        "2": {
+          "label": "Parcialmente nublado",
+          "image": "cloud_sun",
+          "url": "https://..."
+        },
+        "3": {
+          "label": "Nublado",
+          "image": "cloud",
+          "url": "https://..."
+        },
+        "45": {
+          "label": "Nevoeiro",
+          "image": "fog",
+          "url": "https://..."
+        },
+        "48": {
+          "label": "Nevoeiro",
+          "image": "fog",
+          "url": "https://..."
+        },
+        "61": {
+          "label": "Chuva fraca",
+          "image": "rain_light",
+          "url": "https://..."
+        },
+        "63": {
+          "label": "Chuva moderada",
+          "image": "rain",
+          "url": "https://..."
+        },
+        "65": {
+          "label": "Chuva forte",
+          "image": "rain_heavy",
+          "url": "https://..."
+        },
+        "80": {
+          "label": "Aguaceiros fracos",
+          "image": "shower_light",
+          "url": "https://..."
+        },
+        "81": {
+          "label": "Aguaceiros moderados",
+          "image": "shower",
+          "url": "https://..."
+        },
+        "82": {
+          "label": "Aguaceiros fortes",
+          "image": "shower_heavy",
+          "url": "https://..."
+        },
+        "95": {
+          "label": "Trovoada",
+          "image": "storm",
+          "url": "https://..."
+        }
+      }
+    },
+    {
+      "Type": "HA",
+      "Id": "doors",
+      "Refresh": 5000,
+      "Entities": [
+        "binary_sensor.porta_entrada",
+        "binary_sensor.porta_cozinha",
+        "binary_sensor.porta_alcapao",
+        "binary_sensor.porta_centro",
+        "binary_sensor.porta_cozinha_cave",
+        "binary_sensor.porta_oficina"
+      ]
+    },
+    {
+      "Type": "HA",
+      "Id": "people",
+      "Refresh": 5000,
+      "Entities": [
+        "binary_sensor.pessoas_escada",
+        "binary_sensor.pessoas_cozinha_cave",
+        "binary_sensor.pessoas_na_salinha",
+        "binary_sensor.pessoas_na_oficina"
+      ]
+    },
+    {
+      "Type": "Power",
+      "Id": "casa",
+      "Entity": "sensor.energia_pj2101a_local_power",
+      "Unit": "W",
+      "Refresh": 2000
+    },
+    {
+      "Type": "HA",
+      "Id": "office_controls",
+      "Refresh": 2000,
+      "Entities": [
+        "switch.tomada_pc",
+        "light.escritorio_work_bar_light_gledopto_gl_lb_001p"
+      ]
+    }
+  ],
+  "Screens": [
+    {
+      "Invert": true,
+      "Rotation": 1,
+      "Number": 1,
+      "Refresh": 1000,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "Type": "DrawText",
+          "X": 5,
+          "Y": 5,
+          "Text": "function:Clock",
+          "Font": 4,
+          "Color": "white"
+        },
+        {
+          "Type": "DrawText",
+          "X": 40,
+          "Y": 75,
+          "Font": 2,
+          "Color": "White",
+          "Text": "datasource:weather_aveiro:codeText"
+        },
+        {
+          "Type": "DrawImage",
+          "X": 10,
+          "Y": 70,
+          "Zoom": 1,
+          "Image": "datasource:weather_aveiro:code_image",
+          "Color": "White"
+        },
+        {
+          "Type": "DrawImageBool",
+          "X": 290,
+          "Y": 5,
+          "Value": "function:IsWIFIConnected",
+          "true": "DrawImage:wifi_on",
+          "false": "DrawImage:wifi_off"
+        },
+        {
+          "Type": "DrawHASensor",
+          "IconX": 198,
+          "IconY": 35,
+          "entity": "binary_sensor.porta_entrada",
+          "state:on": "DrawImage:door_open",
+          "state:open": "DrawImage:door_open",
+          "state:detected": "DrawImage:door_open",
+          "state:off": "DrawImage:door_closed",
+          "state:close": "DrawImage:door_closed",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 228,
+          "Y": 35,
+          "Text": "Entrada"
+        },
+        {
+          "Type": "DrawHASensor",
+          "IconX": 198,
+          "IconY": 65,
+          "entity": "binary_sensor.porta_cozinha",
+          "state:on": "DrawImage:door_open",
+          "state:open": "DrawImage:door_open",
+          "state:detected": "DrawImage:door_open",
+          "state:off": "DrawImage:door_closed",
+          "state:close": "DrawImage:door_closed",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 228,
+          "Y": 65,
+          "Text": "Cozinha"
+        },
+        {
+          "Type": "DrawHASensor",
+          "IconX": 198,
+          "IconY": 95,
+          "entity": "binary_sensor.porta_alcapao",
+          "state:on": "DrawImage:door_open",
+          "state:open": "DrawImage:door_open",
+          "state:detected": "DrawImage:door_open",
+          "state:off": "DrawImage:door_closed",
+          "state:close": "DrawImage:door_closed",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 228,
+          "Y": 95,
+          "Text": "Alcapao"
+        },
+        {
+          "Type": "DrawHASensor",
+          "IconX": 198,
+          "IconY": 125,
+          "entity": "binary_sensor.porta_cozinha_cave",
+          "state:on": "DrawImage:door_open",
+          "state:open": "DrawImage:door_open",
+          "state:detected": "DrawImage:door_open",
+          "state:off": "DrawImage:door_closed",
+          "state:close": "DrawImage:door_closed",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 228,
+          "Y": 125,
+          "Text": "Cozinha Cave"
+        },
+        {
+          "Type": "DrawHASensor",
+          "IconX": 198,
+          "IconY": 155,
+          "entity": "binary_sensor.porta_centro",
+          "state:on": "DrawImage:door_open",
+          "state:open": "DrawImage:door_open",
+          "state:detected": "DrawImage:door_open",
+          "state:off": "DrawImage:door_closed",
+          "state:close": "DrawImage:door_closed",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 228,
+          "Y": 155,
+          "Text": "Centro"
+        },
+        {
+          "Type": "DrawHASensor",
+          "IconX": 198,
+          "IconY": 185,
+          "entity": "binary_sensor.porta_oficina",
+          "state:on": "DrawImage:door_open",
+          "state:open": "DrawImage:door_open",
+          "state:detected": "DrawImage:door_open",
+          "state:off": "DrawImage:door_closed",
+          "state:close": "DrawImage:door_closed",
+          "state:": "DrawImage:warning",
+          "Font": 2,
+          "Color": "White",
+          "X": 228,
+          "Y": 185,
+          "Text": "Oficina"
+        },
+        {
+          "Type": "DrawText",
+          "X": 160,
+          "Y": 12,
+          "Text": "IP:",
+          "Font": 1,
+          "Color": "Magenta"
+        },
+        {
+          "Type": "DrawText",
+          "X": 180,
+          "Y": 12,
+          "Text": "function:MyIP",
+          "Font": 1,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawPowerGraph",
+          "Source": "casa",
+          "X": 10,
+          "Y": 100,
+          "Width": 178,
+          "Height": 90,
+          "Background": "0x0861",
+          "PositiveColor": "Yellow",
+          "NegativeColor": "Green"
+        },
+        {
+          "Type": "DrawText",
+          "X": 10,
+          "Y": 196,
+          "Prefix": "Casa:",
+          "Suffix": "W",
+          "Font": 2,
+          "Text": "power:casa"
+        }
+      ]
+    },
+    {
+      "Number": 2,
+      "Rotation": 1,
+      "Invert": true,
+      "Refresh": 500,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "Type": "DrawText",
+          "X": 10,
+          "Y": 5,
+          "Text": "Escritorio",
+          "Font": 4,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "switch.tomada_pc",
+          "X": 10,
+          "Y": 65,
+          "Width": 300,
+          "Height": 50,
+          "Text": "PC Luzes",
+          "Font": 2,
+          "Background": "0x0861",
+          "OnColor": "Yellow",
+          "OffColor": "DarkGrey"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "light.escritorio_work_bar_light_gledopto_gl_lb_001p",
+          "X": 10,
+          "Y": 125,
+          "Width": 300,
+          "Height": 50,
+          "Text": "Barra LED",
+          "Font": 2,
+          "Background": "0x0861",
+          "OnColor": "Yellow",
+          "OffColor": "DarkGrey"
+        },
+        {
+          "Type": "DrawText",
+          "X": 10,
+          "Y": 205,
+          "Text": "Toque no botao para ligar/desligar",
+          "Font": 1,
+          "Color": "White"
+        }
+      ]
+    }
+  ]
+}
