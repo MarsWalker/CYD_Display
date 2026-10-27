@@ -1,17 +1,21 @@
-# DataSources do dash001.5
+# Dashboard data sources — dashIDE002.1
 
-O JSON da board define **o que consultar** em `DataSources` e **onde mostrar**
-em `Screens[].Objects`. Declarar uma fonte não cria objetos no ecrã.
-Os tipos implementados são `Weather`, `HA`, `Ping` e `Power`.
+The board JSON defines **what to query** in `DataSources` and **where to display
+it** in `Screens[].Objects`. Declaring a source does not create screen objects.
+Implemented source types are `Weather`, `HA`, `Ping` and `Power`.
 
-Os exemplos abaixo são fragmentos JSON válidos: os arrays de fontes entram em
-`DataSources` e os arrays de objetos em `Screens[].Objects`. Ao combinar
-exemplos, juntar os elementos num único array, sem repetir as chaves na raiz.
-Os nomes e as maiúsculas das chaves devem seguir os exemplos.
+The examples below are valid JSON fragments. Place source arrays in
+`DataSources` and object arrays in `Screens[].Objects`. When combining examples,
+merge their elements into one array rather than repeating root keys. Key names
+and capitalization must match the examples.
 
-## Estrutura de uma board
+Example entity IDs, source IDs and private network addresses are retained from
+the existing layouts. Replace entities and hosts with your own. IDs such as
+`casa` and `sala` are identifiers, not translated configuration keywords.
 
-Exemplo completo e utilizável com o gráfico da casa:
+## Board structure
+
+Complete example with a household power graph:
 
 ```json
 {
@@ -31,45 +35,46 @@ Exemplo completo e utilizável com o gráfico da casa:
         {"Type": "FillScreen", "Color": "Black"},
         {"Type": "DrawText", "X": 10, "Y": 10, "Text": "function:Clock", "Font": 4, "Color": "White"},
         {"Type": "DrawPowerGraph", "Source": "casa", "X": 10, "Y": 100, "Width": 178, "Height": 90},
-        {"Type": "DrawText", "X": 10, "Y": 196, "Text": "power:casa", "Prefix": "Casa:", "Suffix": "W", "Font": 2}
+        {"Type": "DrawText", "X": 10, "Y": 196, "Text": "power:casa", "Prefix": "House:", "Suffix": "W", "Font": 2}
       ]
     }
   ]
 }
 ```
 
-`DataSources[].Refresh` define o intervalo de consulta, em milissegundos;
-`Screens[].Refresh` define o intervalo de desenho. Os pedidos e a execução das
-outras fontes podem aumentar o intervalo real. O desenho lê os dados em cache.
-As fontes são globais à board, mesmo quando se muda de ecrã.
+`DataSources[].Refresh` controls polling in milliseconds; `Screens[].Refresh`
+controls drawing. Network requests and other sources can increase the actual
+interval. Drawing reads cached values. Sources are global to the board and
+remain active when switching screens.
 
-As posições são em píxeis, a partir do canto superior esquerdo, sem escalamento
-automático. `Rotation: 1` dá 320×240 nas amarelas/pink e 480×320 na black.
-Os exemplos são peças de layout: ajustar posições ao juntá-los para evitar
-sobreposição. O `simple.v5.json` atual mostra o gráfico no lugar dos pings e apenas o valor
-da casa por baixo. Não declara pings nem os sensores da sala.
+Positions are pixels measured from the upper-left corner, without automatic
+scaling. With `Rotation: 1`, the configured ILI9341 and ST7789 profiles use
+320×240, and the AXS15231B profile uses 480×320. Adjust positions when combining
+examples to avoid overlaps. Display inversion must match your panel.
 
-## Fontes disponíveis no projeto
+`simple.v5.json` replaces the ping area with a graph and the household power
+value underneath. It does not declare Ping sources or the living-room sensors.
 
-| Id | Tipo | Conteúdo | Referência usada no desenho |
+## Sources used by the example layouts
+
+| Id | Type | Contents | Screen reference |
 | --- | --- | --- | --- |
-| `weather_aveiro` | Weather | Meteorologia da localização definida no URL | `datasource:weather_aveiro:campo` |
-| `doors` | HA | Seis portas | `DrawHASensor` com `entity` |
-| `people` | HA | Quatro sensores de presença | `DrawHASensor` com `entity` |
-| `sala` | HA | Temperatura, humidade e luminosidade | `entity:sensor...` em `DrawText` |
-| `casa` | Power | Potência e histórico da casa | `DrawPowerGraph` e `power:casa` |
+| `weather_aveiro` | Weather | Weather at the coordinates in the URL | `datasource:weather_aveiro:<field>` |
+| `doors` | HA | Six doors | `DrawHASensor` with `entity` |
+| `people` | HA | Four presence sensors | `DrawHASensor` with `entity` |
+| `sala` | HA | Living-room temperature, humidity and illuminance | `entity:sensor...` in `DrawText` |
+| `casa` | Power | Household power and history | `DrawPowerGraph` and `power:casa` |
 | `server1` | Ping | `192.168.1.204` | `ping:server1` |
 | `server2` | Ping | `192.168.1.75` | `ping:server2` |
 | `server3` | Ping | `192.168.1.79` | `ping:server3` |
 
-A fonte `sala` está documentada para reutilização; não faz parte do
-`simple.v5.json`. As fontes `server1`, `server2` e `server3` são exemplos
-herdados do v4 e também não fazem parte do v5. Os nomes `Id` podem ser alterados,
-desde que se atualizem as referências correspondentes.
+`sala` is documented for reuse and is not part of `simple.v5.json`. The three
+server sources come from v4 and are also absent from v5. IDs can be renamed
+provided their corresponding screen references are updated.
 
-## Weather — meteorologia
+## Weather
 
-### Definir a fonte
+### Define the source
 
 ```json
 [
@@ -86,52 +91,46 @@ desde que se atualizem as referências correspondentes.
       "code": "current.weather_code"
     },
     "Codes": {
-      "0": {"label": "Ceu limpo", "image": "sun"},
-      "2": {"label": "Parcialmente nublado", "image": "cloud_sun"},
-      "3": {"label": "Nublado", "image": "cloud"},
-      "61": {"label": "Chuva fraca", "image": "rain_light"}
+      "0": {"label": "Clear sky", "image": "sun"},
+      "2": {"label": "Partly cloudy", "image": "cloud_sun"},
+      "3": {"label": "Overcast", "image": "cloud"},
+      "61": {"label": "Light rain", "image": "rain_light"}
     }
   }
 ]
 ```
 
-- `url`, com minúsculas, é o endereço do serviço. A localização é determinada
-  pelas coordenadas, não pelo nome `Id`.
-- `Map` associa os campos do dashboard a caminhos no JSON recebido, separados
-  por pontos. O firmware não acrescenta unidades nem converte os valores.
-- `Codes` associa o código meteorológico à descrição e ao nome de um ícone
-  interno de `images.h`. O mapa acima é abreviado; copiar o mapa mais completo
-  de `jsons/simple.v4.json` para cobrir os restantes estados.
-- Um código sem correspondência deixa descrição e nome do ícone vazios.
-  A propriedade `url` dentro de cada código, presente em alguns layouts,
-  não é usada para descarregar imagens.
+- Lowercase `url` is the service address. Coordinates determine the location; the source ID does not.
+- `Map` maps dashboard fields to dot-separated paths in the returned JSON. The firmware does not add units or convert values.
+- `Codes` maps weather codes to labels and built-in `images.h` icons. This abbreviated table can be extended using [simple.v4.json](simple.v4.json).
+- Unmapped codes leave the label and icon name empty. A per-code `url` property found in some layouts does not download an image.
 
-### Mostrar na board
+### Display on the board
 
 ```json
 [
   {"Type": "DrawImage", "X": 10, "Y": 70, "Image": "datasource:weather_aveiro:code_image", "Zoom": 1, "Color": "White"},
   {"Type": "DrawText", "X": 40, "Y": 75, "Text": "datasource:weather_aveiro:codeText", "Font": 2, "Color": "White"},
-  {"Type": "DrawText", "X": 10, "Y": 100, "Text": "datasource:weather_aveiro:temperature", "Prefix": "Exterior: ", "Suffix": " C", "Font": 2, "Color": "Yellow"}
+  {"Type": "DrawText", "X": 10, "Y": 100, "Text": "datasource:weather_aveiro:temperature", "Prefix": "Outside: ", "Suffix": " C", "Font": 2, "Color": "Yellow"}
 ]
 ```
 
-Campos de `datasource:<Id>:<campo>`: `temperature`, `humidity`, `pressure`,
-`wind`, `code`, `codeText` e `code_image`. Também existem os aliases `code_text`,
-`codeImage` e `image`. Usar IDs curtos: a referência completa do objeto tem de
-caber no respetivo campo de texto/imagem.
+Fields for `datasource:<Id>:<field>` are `temperature`, `humidity`, `pressure`,
+`wind`, `code`, `codeText` and `code_image`. Aliases include `code_text`,
+`codeImage` and `image`. Keep IDs short enough for the full expression to fit
+inside the object's text/image field.
 
 ## HA — Home Assistant
 
-`HA_URL` e `HA_TOKEN` vêm de `secrets.h`, com possíveis overrides de
-`/secrets.json` no SD. As fontes HA usam esta configuração comum. Cada entidade
-é consultada individualmente em `/api/states/<entity_id>`.
+`HA_URL` and `HA_TOKEN` come from local `secrets.h`, optionally overridden by
+SD `/secrets.json`. All HA sources share this configuration. Each entity is
+queried individually at `/api/states/<entity_id>`.
 
-`Entities` aceita um array ou uma string separada por vírgulas; recomenda-se o
-array. O grupo `Id` organiza as consultas. O desenho usa o **entity_id completo**,
-sem o Id do grupo. `entity:<entity_id>` devolve o estado textual, não atributos.
+`Entities` accepts an array or a comma-separated string; an array is recommended.
+The group `Id` organizes polling. Screen objects use the **full entity ID**,
+without the group ID. `entity:<entity_id>` returns the state text, not attributes.
 
-### Portas — fonte doors
+### Doors — source doors
 
 ```json
 [
@@ -151,7 +150,7 @@ sem o Id do grupo. `entity:<entity_id>` devolve o estado textual, não atributos
 ]
 ```
 
-Exemplo de uma porta no ecrã; repetir o objeto com as outras entidades e posições:
+One door object; repeat with different entities and positions:
 
 ```json
 [
@@ -161,7 +160,7 @@ Exemplo de uma porta no ecrã; repetir o objeto com as outras entidades e posiç
     "IconY": 35,
     "X": 228,
     "Y": 35,
-    "Text": "Entrada",
+    "Text": "Entrance",
     "Font": 2,
     "Color": "White",
     "entity": "binary_sensor.porta_entrada",
@@ -172,13 +171,12 @@ Exemplo de uma porta no ecrã; repetir o objeto com as outras entidades e posiç
 ]
 ```
 
-`IconX/IconY` posicionam o ícone; `X/Y` posicionam a legenda. As regras
-`state:<valor>` comparam o estado exato recebido. Se a integração devolver
-`open`/`closed`, adicionar essas regras. `else` mostra o aviso quando não há
-correspondência, incluindo estados desconhecidos. Existem até seis regras
-por objeto; uma delas pode ser `else`.
+`IconX/IconY` position the icon; `X/Y` position its label. `state:<value>` rules
+match the exact returned state. Add `open`/`closed` rules if your integration
+uses those states. `else` is the fallback, including unknown states. Each
+object supports up to six rules, one of which can be `else`.
 
-### Presença — fonte people
+### Presence — source people
 
 ```json
 [
@@ -204,7 +202,7 @@ por objeto; uma delas pode ser `else`.
     "IconY": 180,
     "X": 40,
     "Y": 180,
-    "Text": "Escada",
+    "Text": "Stairs",
     "Font": 2,
     "Color": "White",
     "entity": "binary_sensor.pessoas_escada",
@@ -215,13 +213,13 @@ por objeto; uma delas pode ser `else`.
 ]
 ```
 
-A fonte `people` está declarada no layout atual, mas é preciso acrescentar
-objetos como este para a tornar visível. Consultar estados no dashboard não
-ativa os alertas Telegram do projeto Python da Raspi.
+The `people` source is declared in the example layout, but it needs screen
+objects such as this one to become visible. Reading states on this dashboard
+does not enable Telegram alerts from the companion Raspberry Pi Python project.
 
-### Sala — temperatura, humidade e luz
+### Living room — temperature, humidity and light
 
-Para voltar a usar estes sensores, inserir esta fonte em `DataSources`:
+To restore these sensors, add this source to `DataSources`:
 
 ```json
 [
@@ -238,29 +236,27 @@ Para voltar a usar estes sensores, inserir esta fonte em `DataSources`:
 ]
 ```
 
-E estes objetos em `Screens[].Objects`:
+Add these objects to `Screens[].Objects`:
 
 ```json
 [
   {"Type": "DrawText", "X": 10, "Y": 100, "Text": "entity:sensor.pessoas_sala_temperature", "Prefix": "Temp: ", "Suffix": " C", "Font": 4, "Color": "Yellow"},
-  {"Type": "DrawText", "X": 10, "Y": 130, "Text": "entity:sensor.pessoas_sala_humidity", "Prefix": "Humidade: ", "Suffix": " %", "Font": 2, "Color": "Green"},
-  {"Type": "DrawText", "X": 10, "Y": 155, "Text": "entity:sensor.pessoas_sala_illuminance", "Prefix": "Luz: ", "Suffix": " lux", "Font": 2, "Color": "Cyan"}
+  {"Type": "DrawText", "X": 10, "Y": 130, "Text": "entity:sensor.pessoas_sala_humidity", "Prefix": "Humidity: ", "Suffix": " %", "Font": 2, "Color": "Green"},
+  {"Type": "DrawText", "X": 10, "Y": 155, "Text": "entity:sensor.pessoas_sala_illuminance", "Prefix": "Light: ", "Suffix": " lux", "Font": 2, "Color": "Cyan"}
 ]
 ```
 
-Estas posições sobrepõem-se ao gráfico atual: mover o gráfico ou
-substituir os seus objetos ao recuperar a sala. `Prefix` é a grafia
-recomendada; a grafia histórica `Preffix` também é aceite.
+These positions overlap the power graph: move the graph or replace its objects.
+`Prefix` is the recommended spelling; the legacy `Preffix` spelling is accepted.
 
-Os valores são apresentados como vêm do HA, sem arredondamento nem leitura
-automática da unidade. `Prefix`/`Suffix` compõem o texto. Estados vazios,
-`unknown` e `unavailable` aparecem como `--`, mantendo prefixo e sufixo.
-Se um pedido HTTP falhar, o cache HA pode manter o último estado recebido;
-o texto não é um indicador de atualidade da leitura.
+Values are displayed as received from HA, without rounding or automatic unit
+lookup. `Prefix`/`Suffix` compose the label. Empty, `unknown` and `unavailable`
+states display `--`, retaining the prefix and suffix. Failed HTTP requests may
+leave the last received state in the cache, so the text is not a freshness indicator.
 
-## Power — gráfico de potência da casa
+## Power — household power graph
 
-O `simple.v5.json` usa esta fonte para consultar o mesmo sensor da Raspi:
+`simple.v5.json` uses this source for the household power sensor:
 
 ```json
 [
@@ -274,67 +270,71 @@ O `simple.v5.json` usa esta fonte para consultar o mesmo sensor da Raspi:
 ]
 ```
 
-`Power` consulta o Home Assistant com os mesmos `HA_URL` e `HA_TOKEN` das
-fontes HA. Não é preciso declarar a entidade também num grupo `HA`.
-`Entity` é obrigatório (até 63 bytes); `Id` até 31 bytes. Existe uma fonte
-Power por board, partilhada pelos ecrãs. `Unit` aceita `W` ou `kW`: kW são
-convertidos para W antes de guardar, desenhar e apresentar o valor.
+`Power` uses the same HA URL/token as HA sources. There is no need to include
+the entity in an HA group as well. `Entity` is required and supports up to
+63 bytes; `Id` supports up to 31 bytes. One Power source is shared across screens.
+`Unit` accepts `W` or `kW`; kW readings are converted to W before storage and display.
 
-`Refresh` é o intervalo mínimo entre o fim de uma tentativa de consulta e
-a seguinte: default 2000 ms, limitado a 2000..3600000 ms. A execução das outras
-fontes e pedidos HTTP pode prolongar o intervalo real. A consulta corre na
-tarefa de dados existente, com timeout HTTP de 3 segundos. Não é criada uma
-tarefa adicional para o gráfico.
+`Refresh` is the minimum interval from the end of one polling attempt to the
+next: default 2000 ms, clamped to 2000–3600000 ms. Other sources and HTTP
+requests may increase the actual interval. Polling runs in the existing data
+task with a three-second HTTP timeout; the graph does not create another task.
 
-### Mostrar o gráfico e o valor por baixo
+### Display the graph and value underneath
 
 ```json
 [
   {"Type": "DrawPowerGraph", "Source": "casa", "X": 10, "Y": 100, "Width": 178, "Height": 90},
-  {"Type": "DrawText", "X": 10, "Y": 196, "Text": "power:casa", "Prefix": "Casa:", "Suffix": "W", "Font": 2}
+  {"Type": "DrawText", "X": 10, "Y": 196, "Text": "power:casa", "Prefix": "House:", "Suffix": "W", "Font": 2}
 ]
 ```
 
-- `Source` é o Id da fonte Power. `Width`/`Height` incluem o rebordo; defaults
-  178×90. É necessário um espaço de pelo menos 64×40. O desenho é limitado às
-  margens físicas do ecrã; coordenadas negativas ou espaço insuficiente não
-  são desenhados.
-- Janela fixa dos últimos **5 minutos**, com a amostra mais recente à direita
-  e posições horizontais calculadas pelos tempos reais. No início o histórico
-  vai preenchendo o lado direito. São guardadas até 151 amostras, incluindo
-  timestamp e potência: cerca de 1,2 KB, mais a configuração, no heap.
-- O eixo vertical mostra o **módulo da potência**: mínimo sempre **0 W**;
-  máximo = maior valor absoluto ainda na janela + `max(5 W, 5%)`.
-  Exemplo: pico de -800 W → máximo 840; pico de +50 W → máximo 55.
-  Quando um pico sai da janela, o máximo pode voltar a diminuir.
-- Negativo: **verde vivo**; zero ou positivo: **amarelo**. Na mudança de sinal,
-  interpola-se o ponto de passagem por zero na base e muda-se aí a cor.
-  Um segmento negativo que termina ou começa em zero continua verde,
-  como no Python da Raspi.
-- Sem histórico: máximo 100, mínimo 0 W. Com amostras válidas apenas a zero:
-  máximo 5. Com menos de duas amostras mostra `aguarda...`.
-- `power:casa` apresenta a última potência válida em W, truncada para inteiro,
-  por exemplo `Casa:-382W`. Prefixo e valor recebem a cor do sinal, tal como
-  na Raspi, independentemente do campo `Color`. Antes da primeira leitura
-  mostra `Casa:--W` em branco.
-- Estados vazios, `unknown`, `unavailable`, valores não numéricos, NaN/Inf e
-  falhas HTTP não acrescentam amostras e mantêm o último valor válido.
-  Aceitam-se valores absolutos até 1 000 000 000 W. O gráfico envelhece as
-  amostras, mas o texto mantém a última leitura válida, como a Raspi; uma linha
-  pode ligar leituras válidas separadas por uma falha temporária.
-- Mudar de ecrã conserva o histórico; reiniciar ou recarregar o JSON limpa-o.
-  O histórico não é gravado em SD/flash. O gráfico desenha diretamente no
-  painel, sem framebuffer e sem biblioteca gráfica adicional.
+- `Source` is the Power source ID. `Width`/`Height` include the border and default to 178×90. At least 64×40 pixels are required. Drawing is bounded by the physical screen; negative coordinates or insufficient space are not drawn.
+- The fixed **five-minute** window places newer samples on the right using actual timestamps. During startup, history fills from the right. Up to 151 timestamp/power samples use about 1.2 KB plus configuration on the heap.
+- The vertical axis shows **absolute power**, with a minimum of **0 W**. Maximum = largest absolute value retained in the window + `max(5 W, 5%)`. A -800 W peak gives 840 W; a +50 W peak gives 55 W. The maximum can decrease when an old peak expires.
+- Default colors are **bright green for negative** and **yellow for zero or positive**. A sign change is interpolated through zero at the baseline, where the color changes. A negative segment touching zero remains green, matching the Raspberry Pi graph.
+- Without history, the scale is 0–100 W. All-zero samples give a 5 W maximum. With fewer than two samples, the current firmware displays the literal waiting message `aguarda...`.
+- `power:casa` displays the latest valid watts truncated to an integer, for example `House:-382W`. The text uses the sign color regardless of its `Color` field. Before the first reading it displays `House:--W` in white.
+- Empty, `unknown`, `unavailable`, nonnumeric, NaN/Inf and failed HTTP readings do not add samples; the last valid value is retained. Absolute values up to 1,000,000,000 W are accepted. Samples expire from the graph, while the text retains the latest valid reading. A line may connect valid readings across a temporary failure.
+- Screen changes retain history; restarting or reloading the board JSON clears it. History is not saved to SD/flash. Drawing uses no graph framebuffer or additional graphics library.
 
-Para diagnóstico, ativar `Log.Power=true`: regista valor, número de amostras,
-heap livre e falhas de leitura. Os restantes logs podem ficar desligados.
+This is **power in watts**, not accumulated energy in kWh.
 
-## Ping — disponibilidade dos servidores (opcional, herdado do v4)
+### Configure graph colors
 
-O firmware mantém suporte a Ping, mas o simple.v5.json não usa estas fontes.
-Os exemplos seguintes são alternativas ao gráfico na mesma zona.
+Each graph object can override its palette independently:
 
-### Definir as fontes
+```json
+{
+  "Type": "DrawPowerGraph",
+  "Source": "casa",
+  "X": 10,
+  "Y": 100,
+  "Width": 178,
+  "Height": 90,
+  "Background": "0x0861",
+  "PositiveColor": "Yellow",
+  "NegativeColor": "Green"
+}
+```
+
+Omitted, empty or non-string properties keep their individual defaults:
+background RGB565 `0x0861`, positive yellow and negative green. `Background`
+is the preferred key; `background` and the historical typo `backgroud` are
+accepted aliases. Use supported color names or RGB565 strings such as
+`0x0861`, not CSS `#RRGGBB` values. Graph palette overrides apply to the graph;
+the `power:` text retains its automatic sign colors.
+
+For diagnostics, enable `Log.Power`: logs include value, sample count, free
+heap and read failures. Other source logs can remain disabled.
+
+## Ping — server availability
+
+Ping remains supported in the firmware, although `simple.v5.json` does not
+use it. The following examples are alternatives to the graph in the same area.
+The board sends pings to these hosts; this is not a pushed status feed.
+
+### Define sources
 
 ```json
 [
@@ -344,17 +344,16 @@ Os exemplos seguintes são alternativas ao gráfico na mesma zona.
 ]
 ```
 
-`Host` aceita IPv4 ou hostname, por exemplo `raspi2` ou `raspi2.local`.
-São enviados dois pedidos ICMP IPv4, com timeout de 2 segundos por pedido;
-basta uma resposta para dar OK. Um hostname que falhe é tentado também com
-`.local` por mDNS; IPs não recebem esse sufixo.
+`Host` accepts an IPv4 address or hostname, for example `raspi2` or
+`raspi2.local`. Two ICMP IPv4 requests are sent with a two-second timeout per
+request; one reply is sufficient for OK. Failed hostname resolution is also
+tried with a `.local` mDNS name; IP addresses do not receive that suffix.
 
-O intervalo é contado desde o fim da última verificação de cada servidor.
-O default é 10000 ms e o valor é limitado a 1000..3600000 ms. As verificações
-são sequenciais numa tarefa própria; servidores lentos podem atrasar a ronda,
-sem manter bloqueado o mutex de desenho durante os pedidos.
+The interval starts when the previous check finishes. Default: 10000 ms,
+clamped to 1000–3600000 ms. A dedicated task checks hosts sequentially, so
+slow hosts can delay a round without holding the drawing mutex during requests.
 
-### Mostrar texto na board
+### Display text
 
 ```json
 [
@@ -364,16 +363,16 @@ sem manter bloqueado o mutex de desenho durante os pedidos.
 ]
 ```
 
-| Estado | Texto e cor |
+| State | Text and color |
 | --- | --- |
-| Ainda não verificado ou Id inexistente | `--`, branco |
-| Respondeu | `OK`, verde |
-| Sem resposta, falha de resolução/sessão ou Wi-Fi desligado após a primeira leitura | `FAIL`, amarelo |
+| Not checked yet or unknown ID | `--`, white |
+| Replied | `OK`, green |
+| No reply, resolution/session failure or Wi-Fi disconnected after the first result | `FAIL`, yellow |
 
-Nos textos `ping:`, o firmware escolhe a cor de toda a linha automaticamente,
-incluindo o prefixo, sobrepondo o campo `Color`.
+For `ping:` text, firmware automatically colors the entire line, including
+the prefix, overriding the object's `Color` field.
 
-### Mostrar um ícone booleano
+### Display a boolean icon
 
 ```json
 [
@@ -381,13 +380,13 @@ incluindo o prefixo, sobrepondo o campo `Color`.
 ]
 ```
 
-Aqui os ícones Wi-Fi são apenas uma opção visual para representar o servidor.
-`true` significa OK; FAIL, ainda não verificado e Id inexistente dão `false`.
-Este objeto é uma alternativa ao texto na mesma posição.
+Wi-Fi icons are simply a visual choice for server status. Only OK is `true`;
+FAIL, unchecked and unknown IDs are `false`. This replaces the text object at
+the same position.
 
-## Funções locais — sem DataSource
+## Local functions — no DataSource required
 
-Relógio, IP e estado do Wi-Fi não precisam de entradas em `DataSources`:
+Clock, IP and Wi-Fi status need no `DataSources` entries:
 
 ```json
 [
@@ -397,52 +396,53 @@ Relógio, IP e estado do Wi-Fi não precisam de entradas em `DataSources`:
 ]
 ```
 
-Outros textos disponíveis: `function:Date`, `function:Uptime`,
-`function:WifiRSSI` e `function:FreeRAM`. `function:IsHAConnected` também
-existe no resolver booleano, mas indica apenas que há uma fonte HA marcada
-válida no cache; não é uma prova de conectividade atual. MQTT não está
-implementado.
+Other text functions are `function:Date`, `function:Uptime`,
+`function:WifiRSSI` and `function:FreeRAM`. The boolean resolver also supports
+`function:IsHAConnected`, but this only indicates that an HA source is marked
+valid in the cache, not proof of current connectivity. MQTT is not implemented.
 
-## Logs, limites e aplicação do JSON
+## Logging, limits and applying JSON changes
 
-Para diagnosticar consultas, usar este objeto na raiz:
+For polling diagnostics, place this object at the root:
 
 ```json
 {"Log": {"Weather": true, "HA": true, "Ping": true, "Power": true}}
 ```
 
-As flags Weather/HA controlam também os logs HTTP dessas fontes. Ping regista
-a primeira leitura e mudanças de estado. No uso normal podem ficar a `false`.
+Weather/HA flags also control HTTP logs for those sources. Ping logs initial
+results and state changes. Flags can be `false` during normal operation.
 
-Limites atuais do firmware:
-
-| Elemento | Limite |
+| Item | Current limit |
 | --- | --- |
-| Fontes Weather/HA em conjunto | 16 |
-| Fontes Ping | 8 |
-| Fontes Power | 1 |
-| Histórico Power | 151 amostras / 5 minutos |
-| Entidades HA consultadas por grupo | 12 |
-| Lista de entidades por grupo | 511 bytes, incluindo vírgulas |
-| Entidades HA distintas no cache global | 40 |
-| Id de fonte | Até 31 bytes; usar IDs únicos |
-| Host de ping | Até 63 bytes |
-| Mapeamentos meteorológicos Codes | 16 |
-| Objetos por ecrã | 30 |
-| Text/Image/expressão booleana de um objeto | Até 39 bytes |
-| Prefix / Suffix | Até 23 / 15 bytes |
+| Weather/HA sources combined | 16 |
+| Ping sources | 8 |
+| Power sources | 1 |
+| Power history | 151 samples / 5 minutes |
+| HA entities queried per group | 12 |
+| Entity list per group | 511 bytes, including commas |
+| Distinct HA entities in global cache | 40 |
+| Source ID | Up to 31 bytes; use unique IDs |
+| Ping host | Up to 63 bytes |
+| Weather code mappings | 16 |
+| Objects per screen | 30 |
+| Object Text/Image/boolean expression | Up to 39 bytes |
+| Prefix / Suffix | Up to 23 / 15 bytes |
 
-Os limites de texto são em bytes UTF-8. Referências HA longas também têm de
-caber no campo `Text`; os exemplos da sala cabem. O estado HA em cache tem
-até 15 bytes, pelo que estados textuais longos podem ser truncados.
+Text limits are UTF-8 byte limits. Long HA references must fit in `Text`; the
+living-room examples above fit. Cached HA state text holds up to 15 bytes,
+so longer state strings may be truncated.
 
-Guardar o JSON no SD ou na origem configurada em `JSON_URL`, e escolher o nome
-em `JSON_FILE`. Os overrides do SD em `/secrets.json` podem mudar essa seleção.
-O ficheiro no SD tem prioridade sobre a rede. Depois usar
-`http://<ip-da-board>/?reload=true` para reler o layout e as fontes.
-Alterações só a este JSON não exigem recompilar o firmware, desde que a board
-já tenha o dash001.4 para Ping ou o dash001.5 para Power/gráfico.
+Store the JSON on SD or at the base URL configured by `JSON_URL`, and select
+its filename with `JSON_FILE`. SD `/secrets.json` overrides can change these
+settings. An existing SD layout file takes priority over the network copy.
+Then open `http://<board-ip>/?reload=true` to reload the layout and sources.
 
-Referências de implementação: `datasources.h`, `datacache.h`, `functions.h`,
-`ping_sources.h`, `power_source.h`, `power_history.h`, `power_plot.h`,
-`objects.h` e `draw.h`.
+JSON-only changes do not require recompilation when the installed firmware
+supports the requested features. `dashIDE002.1` supports all sources and graph
+color options documented here. Earlier firmware needs the corresponding
+feature support (Ping from dash001.4; Power from dash001.5).
+
+Implementation references in [dashIDE002.1](../dashIDE002.1/):
+`datasources.h`, `datacache.h`, `functions.h`, `ping_sources.h`,
+`power_source.h`, `power_history.h`, `power_plot.h`, `power_graph_json.h`,
+`objects.h` and `draw.h`.
