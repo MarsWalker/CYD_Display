@@ -1,0 +1,382 @@
+/**
+ * @file draw.h
+ *
+ * Render parsed Objects against cached data through the BoardDisplay facade.
+ * Full draws establish the background; later text/icon draws erase their own
+ * previous footprint before painting changed content. Graphs repaint their
+ * bounded rectangle on every screen refresh because time moves the X axis even
+ * without new samples. Object order is painter order: overlapping later objects
+ * can cover earlier ones. Runtime drawing normally runs under the engine lock.
+ */
+
+#ifndef DRAW_H
+#define DRAW_H
+
+#include "board_display.h"
+
+#include "log.h"
+#include "colors.h"
+#include "images.h"
+#include "objects.h"
+#include "functions.h"
+#include "datacache.h"
+#include "datasources.h"
+#include "power_plot.h"
+#include "ha_buttons.h"
+
+/*
+ * draw.h
+ * -------------------------------------------------------
+ * The draw engine: walks g_objects[] (the objects of the
+ * currently loaded screen) and renders each one on the TFT.
+ *
+ * DrawObjects(firstDraw):
+ *   - firstDraw == true  -> full redraw (also applies FillScreen);
+ *   - firstDraw == false -> incremental update, only re-draws the
+ *     objects whose visible content actually changed.
+ * Text objects are re-rendered only when their visible value changes,
+ * except function:Clock, which is refreshed on every draw cycle.
+ * -------------------------------------------------------
+ */
+
+uint16_t g_bgColor = TFT_BLACK;
+
+// ---------------------------------------------------------------
+// Small image helpers: size lookup + 1-bit bitmap draw (from images.h)
+// ---------------------------------------------------------------
+/**
+ * Look up the nominal icon width used to clear its drawing region.
+ * Unknown names reserve the legacy 24-pixel footprint. The built-in images
+ * used by these renderers are treated as square when clearing their area.
+ */
+inline int ImageSize(const char* name)
+{
+    int i = FindImageIndex(name);
+    return (i >= 0) ? IMAGE_TABLE[i].width : 24;
+}
+
+/**
+ * Draw an MSB-first one-bit icon, treating zero bits as transparent.
+ * At unit zoom use the backend bitmap primitive; larger zoom expands each set
+ * bit to a filled square. This routine does not clear the old icon footprint.
+ */
+inline void DrawImageAt(int x, int y, const char* name, uint16_t color, int zoom)
+{
+    int i = FindImageIndex(name);
+    if (i < 0) return;
+
+    const unsigned char* bmp = IMAGE_TABLE[i].data;
+    int w = IMAGE_TABLE[i].width;
+    int h = IMAGE_TABLE[i].height;
+
+    if (zoom <= 1) {
+        tft.drawBitmap(x, y, bmp, w, h, color);
+        return;
+    }
+    for (int py = 0; py < h; py++) {
+        for (int px = 0; px < w; px++) {
+            int idx = py * w + px;
+            if (bmp[idx >> 3] & (0x80 >> (idx & 7))) {
+                tft.fillRect(x + px * zoom, y + py * zoom, zoom, zoom, color);
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------
+// Object renderers
+// ---------------------------------------------------------------
+
+inline void DrawFillScreen(ObjectInfo& obj, bool firstDraw)
+{
+    if (!firstDraw) return;   // background only cleared on a full redraw
+    g_bgColor = GetColorFromName(obj.color);
+    tft.fillScreen(g_bgColor);
+}
+
+/**
+ * Compose prefix + resolved text + suffix, then repaint only changed output.
+ * The remembered width clears any tail left by a shorter replacement. Clock
+ * is refreshed every draw cycle. Power includes its sign-dependent color in
+ * the change hash, so -0.x and +0.x can recolor the same integer text correctly.
+ */
+inline void DrawTextObject(ObjectInfo& obj, bool firstDraw)
+{
+    String txt  = ResolveTextValue(String(obj.text));
+    String full = String(obj.prefix) + txt + String(obj.suffix);
+    String source(obj.text);
+    source.trim();
+    bool isClock = source.equalsIgnoreCase("function:Clock");
+    uint32_t textHash = 2166136261UL;
+    for (size_t i = 0; i < full.length(); i++) {
+        textHash ^= (uint8_t)full[i];
+        textHash *= 16777619UL;
+    }
+
+    if (!source.startsWith("power:") && !firstDraw && !isClock && obj.hasDrawnText &&
+        obj.lastTextHash == textHash) {
+        return;
+    }
+
+    uint16_t textColor = GetColorFromName(obj.color);
+    if (source.startsWith("ping:"))
+        textColor = txt == "OK" ? TFT_GREEN : (txt == "FAIL" ? TFT_YELLOW : TFT_WHITE);
+    /**
+     * The Power label has fixed sign semantics independent of a graph object's
+     * custom palette. Resolve the source by Id rather than infer sign from the
+     * formatted integer: truncation can turn both -0.5 and +0.5 into the text 0.
+     */
+    if (source.startsWith("power:")) {
+        PowerSource* power = FindPowerSource(source.substring(6).c_str());
+        textColor = power && power->history.valid
+            ? (power->history.latest < 0 ? TFT_GREEN : TFT_YELLOW) : TFT_WHITE;
+        // A sign change can alter the color even when integer watts stay zero.
+        textHash ^= textColor;
+        if (!firstDraw && obj.hasDrawnText && obj.lastTextHash == textHash) return;
+    }
+    tft.setTextColor(textColor, g_bgColor);
+    tft.setTextFont(obj.font);
+    tft.setTextDatum(TL_DATUM);
+
+    int textWidth = tft.textWidth(full) + 1;
+    int clearWidth = textWidth > obj.lastTextWidth ? textWidth : obj.lastTextWidth;
+    tft.fillRect(obj.x, obj.y, clearWidth, tft.fontHeight(), g_bgColor);
+
+    tft.setCursor(obj.x, obj.y);
+    tft.print(full);
+
+    obj.lastTextHash = textHash;
+    obj.lastTextWidth = textWidth;
+    obj.hasDrawnText = true;
+}
+
+inline void DrawImageObject(ObjectInfo& obj, bool firstDraw)
+{
+    // The image name may be a datasource reference
+    // (e.g. "datasource:weather_aveiro:code_image").
+    String name = ResolveTextValue(String(obj.image));
+    name.trim();
+
+    if (!firstDraw && strcmp(obj.lastState, name.c_str()) == 0) return;
+    strlcpy(obj.lastState, name.c_str(), sizeof(obj.lastState));
+
+    int zoom = (obj.zoom > 0) ? obj.zoom : 1;
+    int w = ImageSize(name.c_str()) * zoom;
+    int h = w;
+    tft.fillRect(obj.x, obj.y, w, h, g_bgColor);
+
+    int i = FindImageIndex(name.c_str());
+    if (i < 0) {
+        logWf(
+            "[draw] image not found: source='%s' resolved='%s' x=%d y=%d",
+            obj.image,
+            name.c_str(),
+            obj.x,
+            obj.y
+        );
+        return;
+    }
+    uint16_t color = obj.color[0] ? GetColorFromName(obj.color)
+                                 : IMAGE_TABLE[i].defaultColor;
+    DrawImageAt(obj.x, obj.y, name.c_str(), color, zoom);
+}
+
+/**
+ * Choose an image command from a boolean expression and redraw on change.
+ * Only the DrawImage:<name> command syntax is interpreted here; no command
+ * execution, network request or filesystem image lookup occurs.
+ */
+inline void DrawImageBoolObject(ObjectInfo& obj, bool firstDraw)
+{
+    bool on = ResolveBoolValue(String(obj.boolValue));
+    const char* cmd = on ? obj.imageTrue : obj.imageFalse;
+
+    const char* imageName = "";
+    if (cmd && strncmp(cmd, "DrawImage:", 10) == 0) imageName = cmd + 10;
+
+    if (!firstDraw && strcmp(obj.lastState, imageName) == 0) return;
+    strlcpy(obj.lastState, imageName, sizeof(obj.lastState));
+
+    int w = ImageSize(imageName);
+    tft.fillRect(obj.x, obj.y, w, w, g_bgColor);
+
+    int i = FindImageIndex(imageName);
+    if (i >= 0) {
+        DrawImageAt(obj.x, obj.y, imageName, IMAGE_TABLE[i].defaultColor, 1);
+    } else if (imageName[0]) {
+        logWf(
+            "[draw] image not found: bool='%s' cmd='%s' image='%s' x=%d y=%d",
+            obj.boolValue,
+            cmd ? cmd : "",
+            imageName,
+            obj.x,
+            obj.y
+        );
+    }
+}
+
+// Computes the combined entity state and the winning image command
+// of a "DrawHASensor" object. "combined" is the list of
+// entity states joined by '|' (used for change detection); "cmd" is
+// the DrawImage:... command of the first matching state rule ("else"
+// as fallback, "DrawImage:warning" as last resort).
+/**
+ * Scan comma-separated entities and choose the first matching state rule.
+ * This is ordered matching, not an OR/AND aggregation of all HA states.
+ * The concatenated states drive change detection; else and the warning icon
+ * provide fallbacks when no explicit rule wins.
+ */
+inline void ComputeHASensorImage(ObjectInfo& obj, String& combined, const char*& cmd)
+{
+    char buf[sizeof(obj.entities)];
+    strlcpy(buf, obj.entities, sizeof(buf));
+
+    combined = "";
+    cmd = nullptr;
+
+    char* tok = strtok(buf, ",");
+    while (tok) {
+        while (*tok == ' ') tok++;
+        if (tok[0]) {
+            const char* st = EntityStateGet(tok);
+            combined += st;
+            combined += "|";
+
+            if (cmd == nullptr) {
+                char key[32];
+                snprintf(key, sizeof(key), "state:%s", st);
+                for (int k = 0; k < obj.stateCount; k++) {
+                    if (strcmp(obj.stateKey[k], key) == 0 ||
+                        strcmp(obj.stateKey[k], "*") == 0) {
+                        cmd = obj.stateCmd[k];
+                        break;
+                    }
+                }
+            }
+        }
+        tok = strtok(nullptr, ",");
+    }
+
+    if (cmd == nullptr) {
+        for (int k = 0; k < obj.stateCount; k++) {
+            if (strcmp(obj.stateKey[k], "else") == 0) {
+                cmd = obj.stateCmd[k];
+                break;
+            }
+        }
+    }
+    if (cmd == nullptr || cmd[0] == '\0') cmd = "DrawImage:warning";
+}
+
+inline void DrawHASensorObject(ObjectInfo& obj, bool firstDraw)
+{
+    String combined;
+    const char* cmd = nullptr;
+    ComputeHASensorImage(obj, combined, cmd);
+
+    const char* imageName = "";
+    if (cmd && strncmp(cmd, "DrawImage:", 10) == 0) imageName = cmd + 10;
+
+    if (!firstDraw && strcmp(obj.lastState, combined.c_str()) == 0) return;
+    strlcpy(obj.lastState, combined.c_str(), sizeof(obj.lastState));
+
+    int w = ImageSize(imageName);
+    tft.fillRect(obj.x, obj.y, w, w, g_bgColor);
+
+    int i = FindImageIndex(imageName);
+    if (i >= 0) {
+        DrawImageAt(obj.x, obj.y, imageName, IMAGE_TABLE[i].defaultColor, 1);
+    } else if (imageName[0]) {
+        logWf(
+            "[draw] image not found: multi='%s' cmd='%s' image='%s' x=%d y=%d",
+            combined.c_str(),
+            cmd ? cmd : "",
+            imageName,
+            obj.x,
+            obj.y
+        );
+    }
+
+    // Text label next to the icon.
+    if (obj.text[0]) {
+        tft.setTextColor(GetColorFromName(obj.color), g_bgColor);
+        tft.setTextFont(obj.font);
+        tft.setTextDatum(TL_DATUM);
+        tft.setCursor(obj.labelX, obj.labelY);
+        tft.print(obj.text);
+    }
+}
+
+/** Paint a self-contained, bounded control tile using only confirmed HA state.
+ * Reuse existing ObjectInfo storage to avoid enlarging every render-list slot.
+ * Font/label are clipped explicitly rather than changing global TFT viewports.
+ */
+inline void DrawHAButtonObject(ObjectInfo& obj,bool firstDraw) {
+    if (obj.x+obj.x2>tft.width() || obj.y+obj.y2>tft.height()) return;
+    const char* state=EntityStateGet(obj.entities);
+    bool known=HAButtonKnownState(state), on=strcmp(state,"on")==0;
+    bool pending=HAButtonPending(obj.entities), error=HAButtonError(obj.entities);
+    char key[32];snprintf(key,sizeof(key),"%s:%d:%d:%d",state,pending,error,wifiConnected());
+    if (!firstDraw && strcmp(obj.lastState,key)==0) return;
+    strlcpy(obj.lastState,key,sizeof(obj.lastState));
+    uint16_t bg=obj.graphColors.background;
+    uint16_t color=known ? (on?obj.graphColors.positive:obj.graphColors.negative) : TFT_LIGHTGREY;
+    if (!obj.zoom || !wifiConnected()) color=TFT_LIGHTGREY;
+    uint16_t border=error?TFT_RED:(pending?TFT_CYAN:color);
+    tft.fillRect(obj.x,obj.y,obj.x2,obj.y2,bg);
+    tft.drawRect(obj.x,obj.y,obj.x2,obj.y2,border);
+    const char* image=on?obj.imageTrue:obj.imageFalse;
+    if (image[0] && FindImageIndex(image)>=0 && ImageSize(image)<=24) {
+        DrawImageAt(obj.x+6,obj.y+(obj.y2-24)/2,image,color,1);
+    } else {
+        // Generic power symbol works for both lights and smart sockets.
+        int cx=obj.x+17,cy=obj.y+obj.y2/2;
+        tft.drawCircle(cx,cy,9,color);
+        tft.fillRect(cx-3,cy-11,7,8,bg);
+        tft.drawFastVLine(cx,cy-12,12,color);
+    }
+    tft.setTextFont(obj.font);tft.setTextDatum(TL_DATUM);
+    if (tft.fontHeight()>obj.y2-4) tft.setTextFont(1);
+    tft.setTextColor(color,bg);
+    String status=pending?"...":(error?"ERR":(!wifiConnected()?"--":(known?(on?"ON":"OFF"):"--")));
+    // Fit both labels to the rectangle, keeping the status visible on narrow tiles.
+    while (status.length() && tft.textWidth(status)>obj.x2-40) status.remove(status.length()-1);
+    int sw=tft.textWidth(status), right=obj.x+obj.x2-6-sw;
+    String label(obj.text);
+    while (label.length() && tft.textWidth(label)>right-(obj.x+34)-5) label.remove(label.length()-1);
+    int y=obj.y+(obj.y2-tft.fontHeight())/2;
+    tft.setCursor(obj.x+34,y);tft.print(label);
+    tft.setCursor(right,y);tft.print(status);
+}
+
+// ---------------------------------------------------------------
+// Main entry: draws every object of the current screen.
+// ---------------------------------------------------------------
+/**
+ * Paint the active list and flush a buffered backend once at the end.
+ * The caller decides whether this is a full screen load or incremental draw.
+ * Graph Source is a Power Id; the graph repaints only its own clipped area.
+ */
+inline void DrawObjects(bool firstDraw)
+{
+    for (int i = 0; i < g_objectCount; i++) {
+        ObjectInfo& obj = g_objects[i];
+        switch (obj.type) {
+            case OBJ_DRAWHABUTTON: DrawHAButtonObject(obj,firstDraw); break;
+            case OBJ_DRAWPOWERGRAPH: {
+                PowerSource* power = FindPowerSource(obj.image);
+                RenderPowerGraph(tft, power ? &power->history : nullptr, millis(), obj.x, obj.y, obj.x2, obj.y2, obj.graphColors);
+                break;
+            }
+            case OBJ_FILLSCREEN:    DrawFillScreen(obj, firstDraw);     break;
+            case OBJ_DRAWTEXT:      DrawTextObject(obj, firstDraw);      break;
+            case OBJ_DRAWIMAGE:     DrawImageObject(obj, firstDraw);     break;
+            case OBJ_DRAWIMAGEBOOL: DrawImageBoolObject(obj, firstDraw); break;
+            case OBJ_DRAWHA_SENSOR: DrawHASensorObject(obj, firstDraw);  break;
+            default: break;   // OBJ_TOUCH is ignored at parse time
+        }
+    }
+    tft.present();
+}
+
+#endif // DRAW_H

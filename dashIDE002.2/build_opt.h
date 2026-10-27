@@ -1,0 +1,2 @@
+-DDASH_IDE_PROFILE=1
+-include ide_build.h

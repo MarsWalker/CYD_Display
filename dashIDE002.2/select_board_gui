@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Start the GUI from any working directory; do not prepare hardware implicitly.
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+exec python3 "$script_dir/select_board_gui.py" "$@"

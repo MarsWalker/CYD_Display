@@ -5,13 +5,13 @@ weather, network availability and household power. Screen layouts are JSON
 files: change the layout and reload it from the board's web interface without
 recompiling the firmware.
 
-The current firmware is **dashIDE002.1**, prepared for **Arduino IDE 2.x** on
+The current firmware is **dashIDE002.2**, prepared for **Arduino IDE 2.x** on
 Windows and Linux. A Python selector configures one of four hardware profiles,
 using either a graphical interface or the command line.
 
 ## Example result
 
-One of the finished dashboards, using the `simple.v5.json` layout:
+One of the finished dashboards, using the `simple.v6.json` layout:
 
 ![CYD Display running the simple.v5 dashboard](https://raw.githubusercontent.com/MarsWalker/CYD_Display/main/images/simple.v5.jpg)
 
@@ -19,18 +19,19 @@ One of the finished dashboards, using the `simple.v5.json` layout:
 
 | Location | Contents |
 | --- | --- |
-| [dashIDE002.1/](dashIDE002.1/) | Firmware, hardware profiles, selection tools and tests. |
-| [Firmware setup guide](dashIDE002.1/README.md) | Detailed installation, IDE settings, CLI builds and validation notes. |
+| [dashIDE002.2/](dashIDE002.2/) | Firmware, hardware profiles and selection tools. |
+| [Firmware setup guide](dashIDE002.2/README.md) | Detailed installation, IDE settings, CLI builds and validation notes. |
 | [dashboards/](https://github.com/MarsWalker/CYD_Display/tree/main/dashboards) | Hosted JSON layouts and their data-source documentation. |
 
 Dashboard files are maintained separately from the firmware folder. The
-configuration template selects `simple.v5.json` from this repository's
+configuration template selects `simple.v6.json` from this repository's
 `dashboards/` directory by default.
 
 ## Features
 
 - Standalone and multi-screen JSON dashboards, including external screen files.
 - Home Assistant entities and configurable weather HTTP/JSON sources.
+- Touch buttons for Home Assistant lights and smart sockets, with live ON/OFF state.
 - ICMP ping checks with `OK`, `FAIL` and initial `--` status.
 - A five-minute household power graph with automatic scaling and configurable colors.
 - Built-in bitmap icons, text, sensor state icons, clock, date and device values.
@@ -86,7 +87,7 @@ and `hardware/User_Setups/`. Keep these files together with the sketch.
 
 ### 2. Create your private configuration
 
-Open a terminal in `dashIDE002.1` and copy the template.
+Open a terminal in `dashIDE002.2` and copy the template.
 
 Linux:
 
@@ -109,7 +110,7 @@ The public defaults are:
 
 ```cpp
 const char* JSON_URL = "https://raw.githubusercontent.com/MarsWalker/CYD_Display/main/dashboards/";
-const char* JSON_FILE = "simple.v5.json";
+const char* JSON_FILE = "simple.v6.json";
 const char* HOSTNAME = "cyd-dashboard";
 ```
 
@@ -147,7 +148,7 @@ In the window:
 
 1. Choose the hardware profile. Aliases appear beside its public name.
 2. Check the prefilled **Arduino IDE executable** path. Edit it or use **Browse...** if necessary; the file picker starts in the current executable's folder when available.
-3. Click **Save and Execute IDE** to save the selection and open `dashIDE002.1.ino`.
+3. Click **Save and Execute IDE** to save the selection and open `dashIDE002.2.ino`.
 4. Configure the Arduino IDE Tools options shown by the selector.
 
 **Apply selection** saves without opening the IDE. **Copy IDE settings** copies
@@ -165,7 +166,7 @@ python3 select_board.py esp32_ili9341_xpt2046
 ```
 
 On Windows use `py -3 select_board.py esp32_ili9341_xpt2046`.
-Then open `dashIDE002.1.ino` manually. The detailed firmware guide includes
+Then open `dashIDE002.2.ino` manually. The detailed firmware guide includes
 all profiles and the shell/Windows wrappers.
 
 ### 4. Configure Tools, compile and upload
@@ -177,10 +178,10 @@ all profiles and the shell/Windows wrappers.
 
 Choose the board's serial port, then use **Verify** and **Upload** normally.
 Serial output uses **115200 baud**. No extra compiler flags need to be entered
-manually in the IDE. Keep the folder name `dashIDE002.1` matching its `.ino` file.
+manually in the IDE. Keep the folder name `dashIDE002.2` matching its `.ino` file.
 
 The selector prints the matching FQBN for Arduino CLI users. CLI build helpers
-are also included; see the [firmware setup guide](dashIDE002.1/README.md) for
+are also included; see the [firmware setup guide](dashIDE002.2/README.md) for
 their library directory requirements and profile options.
 
 ## Dashboard JSON
@@ -229,7 +230,7 @@ a result, then `OK` or `FAIL`. Up to eight Ping sources are supported.
 Built-in text values include `function:Clock`, `function:Date`,
 `function:Uptime`, `function:WifiRSSI`, `function:FreeRAM` and `function:MyIP`.
 MQTT is not implemented. Objects include `FillScreen`, `DrawText`, `DrawImage`,
-`DrawImageBool`, `DrawHASensor` and `DrawPowerGraph`, with up to 30 per screen.
+`DrawImageBool`, `DrawHASensor`, `DrawPowerGraph` and `DrawHAButton`, with up to 30 per screen.
 
 ### Household power graph
 
@@ -288,11 +289,50 @@ Only one Power source is supported. It polls no faster than every two seconds;
 invalid readings do not create samples. History resets on reboot or board JSON
 reload and is not saved to SD/flash.
 
+### Touch controls for lights and smart sockets
+
+`simple.v6.json` keeps the graph dashboard on screen 1 and adds office controls
+on screen 2. It demonstrates a smart socket (`switch.tomada_pc`) and a light
+(`light.escritorio_work_bar_light_gledopto_gl_lb_001p`). Replace these IDs with
+your own entities when adapting the layout.
+
+Declare each controlled entity in an ordinary `HA` source, then add an object:
+
+```json
+{
+  "Type": "DrawHAButton",
+  "entity": "switch.office_lights",
+  "X": 10,
+  "Y": 65,
+  "Width": 300,
+  "Height": 50,
+  "Text": "Office lights",
+  "Font": 2,
+  "Background": "0x0861",
+  "OnColor": "Yellow",
+  "OffColor": "DarkGrey"
+}
+```
+
+The entire rectangle displays status and accepts a tap. Only a new press after
+release can send another command. Supported domains are `light`, `switch` and
+`input_boolean`. Unknown/offline/disabled buttons consume touches without
+sending commands. HA confirms the state; a timeout is not retried automatically.
+Full fields and examples: [dashboard documentation](dashboards/readme.md#drawhabutton--lights-and-smart-sockets).
+
 ## Reload, touch and web controls
 
 After changing a hosted JSON file, open the board's web interface and choose
 **Reload JSON**. A firmware rebuild is unnecessary for layout-only changes.
-Tap the left/right side of the touchscreen to move between screens.
+Touch routing gives buttons priority:
+
+- **Inside a button:** toggle that entity; do not change screens.
+- **Outside buttons, left half:** previous screen.
+- **Outside buttons, right half:** next screen.
+
+Navigation wraps around and requires root `touchEnable: true`. Object controls
+remain active independently of that navigation flag. On the v6 control screen,
+tap the title area or below the buttons to navigate.
 
 | URL | Action |
 | --- | --- |
@@ -334,21 +374,15 @@ limits when choosing the network and endpoints used by the board.
 
 ## Development and validation
 
-Hardware-independent tests and selector tests are included under
-`dashIDE002.1/tests/`. Run from the firmware folder:
+Firmware builds passed for all four profiles using ESP32 core 3.3.7 and the
+IDE build-option mechanism through Arduino CLI. Automated development tests
+covered power, pings, button parsing, hit-testing, command dispatch, release
+handling and the board selector. Tests and generated artifacts are excluded
+from the clean `dashIDE002.2` distribution.
 
-```bash
-./tests/run.sh
-python3 -B tests/test_selection.py
-python3 -B tests/test_gui.py
-python3 -B tests/test_ide_launcher.py
-```
-
-Native C++ tests require a host compiler; GUI widget tests require Tkinter and
-a graphical display. Firmware builds for all four profiles have been checked
-with ESP32 core 3.3.7 using the IDE's build-option mechanism through Arduino
-CLI. This does not replace physical display/touch testing for each board.
-The selector GUI has been tested on Linux with a virtual display; its Windows
-desktop behavior has not been verified in this environment.
+The user confirmed physical operation on the 2.8-inch ILI9341/XPT2046 board,
+including the buttons and navigation outside them. The remaining profiles
+passed compilation; that is separate from physical validation. The selector
+GUI was tested on Linux; Windows desktop behavior has not been verified here.
 
 Driver license notices and attributions are retained in their source files.
