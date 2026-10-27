@@ -1,4 +1,4 @@
-# Dashboard data sources — dashIDE002.1
+# Dashboard data sources and touch controls — dashIDE002.2
 
 The board JSON defines **what to query** in `DataSources` and **where to display
 it** in `Screens[].Objects`. Declaring a source does not create screen objects.
@@ -53,7 +53,9 @@ scaling. With `Rotation: 1`, the configured ILI9341 and ST7789 profiles use
 examples to avoid overlaps. Display inversion must match your panel.
 
 `simple.v5.json` replaces the ping area with a graph and the household power
-value underneath. It does not declare Ping sources or the living-room sensors.
+value underneath. `simple.v6.json` retains that dashboard on screen 1 and adds
+two office control buttons on screen 2. Neither layout declares Ping sources
+or the living-room sensors. V6 adds an ordinary HA group for the controls.
 
 ## Sources used by the example layouts
 
@@ -64,6 +66,7 @@ value underneath. It does not declare Ping sources or the living-room sensors.
 | `people` | HA | Four presence sensors | `DrawHASensor` with `entity` |
 | `sala` | HA | Living-room temperature, humidity and illuminance | `entity:sensor...` in `DrawText` |
 | `casa` | Power | Household power and history | `DrawPowerGraph` and `power:casa` |
+| `office_controls` | HA | Office socket and light (v6) | `DrawHAButton` with `entity` |
 | `server1` | Ping | `192.168.1.204` | `ping:server1` |
 | `server2` | Ping | `192.168.1.75` | `ping:server2` |
 | `server3` | Ping | `192.168.1.79` | `ping:server3` |
@@ -254,6 +257,91 @@ lookup. `Prefix`/`Suffix` compose the label. Empty, `unknown` and `unavailable`
 states display `--`, retaining the prefix and suffix. Failed HTTP requests may
 leave the last received state in the cache, so the text is not a freshness indicator.
 
+## DrawHAButton — lights and smart sockets
+
+A single rectangle both displays a Home Assistant entity's state and acts as
+its button. Touching inside the rectangle toggles that entity. Touching outside
+uses the existing left/right screen navigation when enabled. Object controls
+work even when root `touchEnable` disables navigation. A held finger sends
+only one action: release before pressing again.
+
+```json
+{
+  "Type": "DrawHAButton",
+  "entity": "switch.tomada_pc",
+  "X": 10,
+  "Y": 65,
+  "Width": 300,
+  "Height": 50,
+  "Text": "PC Luzes",
+  "Font": 2,
+  "Background": "0x0861",
+  "OnColor": "Yellow",
+  "OffColor": "DarkGrey",
+  "Enabled": true
+}
+```
+
+Add the same entity to an ordinary HA source to keep its state current:
+
+```json
+{
+  "Type": "HA",
+  "Id": "office_controls",
+  "Refresh": 2000,
+  "Entities": [
+    "switch.tomada_pc",
+    "light.escritorio_work_bar_light_gledopto_gl_lb_001p"
+  ]
+}
+```
+
+| Property | Meaning / default |
+| --- | --- |
+| `entity` | One complete HA entity ID, up to 63 bytes; supported domains: `light`, `switch`, `input_boolean`. |
+| `X`, `Y`, `Width`, `Height` | Drawing and hit-test rectangle. Default size 178×44; minimum 64×40. Must fit entirely on the display. |
+| `Text`, `Font` | Label and font (default 2). Labels are shortened to fit. |
+| `Background` | Tile background, default RGB565 `0x0861`. |
+| `OnColor`, `OffColor` | State colors; defaults Yellow / DarkGrey. |
+| `OnImage`, `OffImage` | Optional built-in image names, without `DrawImage:`. Icons must be at most 24 pixels. Default: a drawn power symbol. |
+| `Enabled` | Default true. False keeps the status display but disables commands. |
+
+Text shows `ON` / `OFF`, `--` for uninitialized/unavailable/offline status,
+`...` for an unsent queued request, and `ERR` if the latest command or its
+immediate state readback failed. Errors have a red border; pending uses cyan.
+The last result remains until another interaction. Buttons with unknown states
+are inert. The same object's rectangle consumes the touch even when disabled,
+so touching it cannot unexpectedly change screens. Overlapping buttons are
+hit-tested in reverse drawing order, with the last object taking precedence.
+
+The command is a bearer-authenticated POST to
+`/api/services/<entity-domain>/toggle`, followed by an authenticated state GET.
+Displayed state is never inverted optimistically. Commands run in the existing
+data task under its state lock, with a three-second timeout per request and
+one pending command for the board. Other taps while it is pending are consumed.
+There are no automatic command retries after timeouts: HA may already have
+acted. An error does not prove that the device did not switch.
+A fresh HA group poll follows the action to pick up delayed device changes.
+Existing blocking data requests can delay touch handling and command execution.
+A quick release/press occurring entirely between hardware polls may be missed.
+
+Button fields reuse existing `ObjectInfo` buffers; no framebuffer, extra
+per-object allocation or new task is introduced. Global control bookkeeping
+is one small fixed structure. Release detection is shared by all four touch
+backends; bus errors do not count as a confirmed release.
+
+### Navigate outside the buttons
+
+With root `touchEnable: true`, a touch **outside** the controls navigates:
+left half = previous screen; right half = next screen. Inside a button, the
+control takes precedence and never changes the screen. With two screens,
+either outside navigation direction reaches the other screen.
+
+The [simple.v6.json](simple.v6.json) example has two 300×50 buttons on screen 2:
+**PC Luzes** at (10,65) and **Barra LED** at (10,125). The title and lower area
+remain available for navigation. Screen 1 retains the graph and other existing
+information. Physical operation was confirmed by the user on the 2.8-inch board.
+
 ## Power — household power graph
 
 `simple.v5.json` uses this source for the household power sensor:
@@ -438,11 +526,12 @@ settings. An existing SD layout file takes priority over the network copy.
 Then open `http://<board-ip>/?reload=true` to reload the layout and sources.
 
 JSON-only changes do not require recompilation when the installed firmware
-supports the requested features. `dashIDE002.1` supports all sources and graph
-color options documented here. Earlier firmware needs the corresponding
+supports the requested features. `dashIDE002.2` supports all sources, graph
+color options and touch controls documented here. `DrawHAButton` requires
+`dashIDE002.2` or newer. Earlier firmware needs the corresponding
 feature support (Ping from dash001.4; Power from dash001.5).
 
-Implementation references in [dashIDE002.1](../dashIDE002.1/):
+Implementation references in [dashIDE002.2](../dashIDE002.2/):
 `datasources.h`, `datacache.h`, `functions.h`, `ping_sources.h`,
 `power_source.h`, `power_history.h`, `power_plot.h`, `power_graph_json.h`,
-`objects.h` and `draw.h`.
+`ha_button_model.h`, `ha_buttons.h`, `objects.h` and `draw.h`.
