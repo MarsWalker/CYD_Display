@@ -368,6 +368,56 @@
           "Color": "White"
         }
       ]
+    },
+    {
+      "Number": 3,
+      "Rotation": 1,
+      "Invert": true,
+      "Refresh": 500,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "Type": "DrawText",
+          "X": 10,
+          "Y": 5,
+          "Text": "Interruptores",
+          "Font": 4,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "switch.tomada_pc",
+          "X": 10,
+          "Y": 55,
+          "Width": 100,
+          "Height": 100,
+          "Text": "PC Luzes",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Green",
+          "OffColor": "DarkGrey",
+          "Style": "Toggle",
+          "Orientation": "Vertical"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "light.escritorio_work_bar_light_gledopto_gl_lb_001p",
+          "X": 120,
+          "Y": 55,
+          "Width": 100,
+          "Height": 100,
+          "Text": "Barra LED",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Green",
+          "OffColor": "DarkGrey",
+          "Style": "Toggle",
+          "Orientation": "Vertical"
+        }
+      ]
     }
   ]
 }

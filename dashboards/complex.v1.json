@@ -142,6 +142,13 @@
       "Invert": true,
       "Refresh": 500,
       "name": "complex.v1.ecra2.json"
+    },
+    {
+      "Number": 3,
+      "Rotation": 1,
+      "Invert": true,
+      "Refresh": 500,
+      "name": "complex.v1.ecra3.json"
     }
   ]
 }

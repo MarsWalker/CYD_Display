@@ -1,4 +1,4 @@
-# Dashboard data sources and touch controls — dashIDE002.2
+# Dashboard data sources and touch controls — dashIDE003.1
 
 The board JSON defines **what to query** in `DataSources` and **where to display
 it** in `Screens[].Objects`. Declaring a source does not create screen objects.
@@ -54,8 +54,27 @@ examples to avoid overlaps. Display inversion must match your panel.
 
 `simple.v5.json` replaces the ping area with a graph and the household power
 value underneath. `simple.v6.json` retains that dashboard on screen 1 and adds
-two office control buttons on screen 2. Neither layout declares Ping sources
+two office control buttons on screen 2 and two slider-style controls on screen 3. Neither layout declares Ping sources
 or the living-room sensors. V6 adds an ordinary HA group for the controls.
+
+## One main JSON with external screen files
+
+The [complex.v1.json](complex.v1.json) example splits the three screens of
+`simple.v6.json` into separate files without changing their contents:
+
+| File | Contents |
+| --- | --- |
+| [complex.v1.json](complex.v1.json) | All DataSources, timezone, touch/log settings and screen references. |
+| [complex.v1.ecra1.json](complex.v1.ecra1.json) | Screen 1 settings and dashboard/graph objects. |
+| [complex.v1.ecra2.json](complex.v1.ecra2.json) | Screen 2 settings and office control objects. |
+| [complex.v1.ecra3.json](complex.v1.ecra3.json) | Screen 3 with two slider-style controls and labels underneath. |
+
+Upload **all four files** to the same dashboard directory and set the local
+`JSON_FILE` configuration to `complex.v1.json`. DataSources stay exclusively
+in the main document; screen files consume their shared cached values.
+Changing screens does not clear the entity cache. Objects on the newly loaded
+screen receive a full initial draw, followed by normal incremental updates.
+A board reload still reinitializes sources and caches.
 
 ## Sources used by the example layouts
 
@@ -304,10 +323,19 @@ Add the same entity to an ordinary HA source to keep its state current:
 | `Background` | Tile background, default RGB565 `0x0861`. |
 | `OnColor`, `OffColor` | State colors; defaults Yellow / DarkGrey. |
 | `OnImage`, `OffImage` | Optional built-in image names, without `DrawImage:`. Icons must be at most 24 pixels. Default: a drawn power symbol. |
+
+The updated dashIDE003.1 firmware also provides `socket`, `lamp_on` and
+`lamp_off`. For a socket, use `"OnImage": "socket", "OffImage": "socket"`
+and let `OnColor` / `OffColor` distinguish the states. For a light, use
+`"OnImage": "lamp_on", "OffImage": "lamp_off"`. These icons require
+recompiling and uploading the updated firmware; a JSON upload alone does not
+install new icons. The second screen of `simple.v6.json` and
+`complex.v1.ecra2.json` demonstrates both controls.
+
 | `Enabled` | Default true. False keeps the status display but disables commands. |
 
 Text shows `ON` / `OFF`, `--` for uninitialized/unavailable/offline status,
-`...` for an unsent queued request, and `ERR` if the latest command or its
+`...` for a queued or in-flight request, and `ERR` if the latest command or its
 immediate state readback failed. Errors have a red border; pending uses cyan.
 The last result remains until another interaction. Buttons with unknown states
 are inert. The same object's rectangle consumes the touch even when disabled,
@@ -317,12 +345,15 @@ hit-tested in reverse drawing order, with the last object taking precedence.
 The command is a bearer-authenticated POST to
 `/api/services/<entity-domain>/toggle`, followed by an authenticated state GET.
 Displayed state is never inverted optimistically. Commands run in the existing
-data task under its state lock, with a three-second timeout per request and
+data task outside the rendering/state lock, with a three-second timeout per request and
 one pending command for the board. Other taps while it is pending are consumed.
 There are no automatic command retries after timeouts: HA may already have
 acted. An error does not prove that the device did not switch.
 A fresh HA group poll follows the action to pick up delayed device changes.
-Existing blocking data requests can delay touch handling and command execution.
+A command can wait for the current data request, but drawing and touch feedback
+continue using the cache. Requests are checked every 100 ms when the worker is
+idle and between source/entity polls. `...` also remains visible while a command
+is in flight, until its result is published.
 A quick release/press occurring entirely between hardware polls may be missed.
 
 Button fields reuse existing `ObjectInfo` buffers; no framebuffer, extra
@@ -334,8 +365,8 @@ backends; bus errors do not count as a confirmed release.
 
 With root `touchEnable: true`, a touch **outside** the controls navigates:
 left half = previous screen; right half = next screen. Inside a button, the
-control takes precedence and never changes the screen. With two screens,
-either outside navigation direction reaches the other screen.
+control takes precedence and never changes the screen. Navigation wraps at
+the first and last screens.
 
 The [simple.v6.json](simple.v6.json) example has two 300×50 buttons on screen 2:
 **PC Luzes** at (10,65) and **Barra LED** at (10,125). The title and lower area
@@ -489,6 +520,20 @@ Other text functions are `function:Date`, `function:Uptime`,
 `function:IsHAConnected`, but this only indicates that an HA source is marked
 valid in the cache, not proof of current connectivity. MQTT is not implemented.
 
+## Cached data while requests are running
+
+In dashIDE003.1, HTTP polling does not hold the rendering mutex. The board draws
+from its last complete cache while the data worker fetches updates. Failed reads
+retain the previous valid values. The shared entity cache and each object's
+change-detection state are preserved; removing unread per-group copies does
+not remove the last values used for drawing.
+
+Changing screens, including loading external JSONs, retains the data cache.
+Reloading the main board JSON resets sources/cache/history and changes a
+generation counter so late responses cannot overwrite the new configuration.
+External screen navigation still waits for the file download, and failed
+screen downloads leave the previous screen active.
+
 ## Logging, limits and applying JSON changes
 
 For polling diagnostics, place this object at the root:
@@ -526,12 +571,38 @@ settings. An existing SD layout file takes priority over the network copy.
 Then open `http://<board-ip>/?reload=true` to reload the layout and sources.
 
 JSON-only changes do not require recompilation when the installed firmware
-supports the requested features. `dashIDE002.2` supports all sources, graph
+supports the requested features. `dashIDE003.1` supports all sources, graph
 color options and touch controls documented here. `DrawHAButton` requires
 `dashIDE002.2` or newer. Earlier firmware needs the corresponding
 feature support (Ping from dash001.4; Power from dash001.5).
 
-Implementation references in [dashIDE002.2](../dashIDE002.2/):
+Implementation references in [dashIDE003.1](../dashIDE003.1/):
 `datasources.h`, `datacache.h`, `functions.h`, `ping_sources.h`,
 `power_source.h`, `power_history.h`, `power_plot.h`, `power_graph_json.h`,
-`ha_button_model.h`, `ha_buttons.h`, `objects.h` and `draw.h`.
+`ha_button_model.h`, `ha_buttons.h`, `state_lock.h`, `objects.h` and `draw.h`.
+
+### Slider-style HA control
+
+The updated firmware supports `"Style": "Toggle"` on `DrawHAButton`.
+The track follows `OnColor` / `OffColor`, the white knob moves with the
+confirmed HA state, and `Text` is centered below the track. No ON/OFF text
+is drawn inside the switch. The entire Width/Height rectangle is touchable.
+Pending commands outline the track in cyan; failures outline it in red.
+Unknown or unavailable states appear grey. The default style remains the
+original rectangular tile. This style requires the updated firmware.
+
+```json
+{
+  "Type": "DrawHAButton",
+  "Style": "Toggle",
+  "entity": "switch.tomada_pc",
+  "Orientation": "Vertical",
+  "X": 10, "Y": 55, "Width": 100, "Height": 100,
+  "Text": "PC Luzes", "Font": 2,
+  "Background": "Black", "OnColor": "Green", "OffColor": "DarkGrey"
+}
+```
+
+Set `"Orientation": "Vertical"` for a vertical track (ON at the top).
+Omit it for a horizontal track. Screen 3 uses two compact 100×100 controls,
+leaving the rest of the display available for other objects.
