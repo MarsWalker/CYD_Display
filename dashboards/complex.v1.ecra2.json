@@ -27,7 +27,9 @@
       "Font": 2,
       "Background": "0x0861",
       "OnColor": "Yellow",
-      "OffColor": "DarkGrey"
+      "OffColor": "DarkGrey",
+      "OnImage": "socket",
+      "OffImage": "socket"
     },
     {
       "Type": "DrawHAButton",
@@ -40,7 +42,9 @@
       "Font": 2,
       "Background": "0x0861",
       "OnColor": "Yellow",
-      "OffColor": "DarkGrey"
+      "OffColor": "DarkGrey",
+      "OnImage": "lamp_on",
+      "OffImage": "lamp_off"
     },
     {
       "Type": "DrawText",
