@@ -1,6 +1,11 @@
 {
   "TIMEZONE": "Europe/Lisbon",
   "touchEnable": true,
+  "IdleBrightness": {
+    "Timeout": 120,
+    "Normal": 100,
+    "Dim": 20
+  },
   "Log": {
     "Weather": false,
     "HA": false,
