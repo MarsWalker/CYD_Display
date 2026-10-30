@@ -165,7 +165,7 @@
       "Y": 100,
       "Width": 178,
       "Height": 90,
-      "Background": "0x0861",
+      "Background": "0x0820",
       "PositiveColor": "Yellow",
       "NegativeColor": "Green"
     },
@@ -173,8 +173,8 @@
       "Type": "DrawText",
       "X": 10,
       "Y": 196,
-      "Prefix": "Casa:",
-      "Suffix": "W",
+      "Prefix": "Casa: ",
+      "Suffix": " W ",
       "Font": 2,
       "Text": "power:casa"
     }
