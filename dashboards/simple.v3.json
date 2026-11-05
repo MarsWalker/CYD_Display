@@ -16,7 +16,7 @@
       "Refresh": 1000,
       "Objects": [
         {"Type":"FillScreen","Color":"Black"},
-        {"Type":"DrawText","X":5,"Y":5,"Text":"function:Clock","Font":5,"Color":"white"},
+        {"Type":"DrawText","X":5,"Y":5,"Text":"function:Clock","Font":6,"Color":"white"},
         {"Type":"DrawText","X":40,"Y":75,"Font":2,"Color":"White","Text":"datasource:weather_aveiro:codeText"},
         {"Type":"DrawImage","X":10,"Y":70,"Zoom":1,"Image":"datasource:weather_aveiro:code_image","Color":"White"},
         {"Type":"DrawText","X":10,"Y":100,"Text":"entity:sensor.pessoas_sala_temperature","Preffix":"Temp: ","Suffix":" ºC","Font":4,"Color":"Yellow"},
