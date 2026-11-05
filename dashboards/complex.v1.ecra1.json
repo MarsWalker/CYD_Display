@@ -13,7 +13,7 @@
       "X": 5,
       "Y": 5,
       "Text": "function:Clock",
-      "Font": 4,
+      "Font": 5,
       "Color": "white"
     },
     {
@@ -175,7 +175,7 @@
       "Y": 196,
       "Prefix": "Casa: ",
       "Suffix": " W ",
-      "Font": 2,
+      "Font": 3,
       "Text": "power:casa"
     }
   ]
