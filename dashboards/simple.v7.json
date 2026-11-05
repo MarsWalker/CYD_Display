@@ -49,8 +49,8 @@
           "Type": "DrawText",
           "X": 10,
           "Y": 286,
-          "Prefix": "Casa:",
-          "Suffix": "W",
+          "Prefix": "Casa: ",
+          "Suffix": " W ",
           "Font": 4,
           "Color": "White",
           "Text": "power:casa"
