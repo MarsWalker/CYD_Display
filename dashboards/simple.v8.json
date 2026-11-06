@@ -1,0 +1,88 @@
+{
+  "TIMEZONE": "Europe/Lisbon",
+  "touchEnable": false,
+  "Log": {
+    "Weather": false,
+    "HA": false,
+    "Power": false,
+    "DHT": false
+  },
+  "DataSources": [
+    {
+      "Type": "Power",
+      "Id": "casa",
+      "Entity": "sensor.energia_pj2101a_local_power",
+      "Unit": "W",
+      "Refresh": 2000
+    },
+    {
+      "Type": "DHT11",
+      "Id": "interior",
+      "Pin": 27,
+      "Refresh": 5000
+    }
+  ],
+  "Screens": [
+    {
+      "Number": 1,
+      "Rotation": 0,
+      "Invert": true,
+      "Refresh": 1000,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "Type": "DrawText",
+          "X": 24,
+          "Y": 10,
+          "Text": "function:Clock",
+          "Font": 6,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawPowerGraph",
+          "Source": "casa",
+          "X": 10,
+          "Y": 76,
+          "Width": 220,
+          "Height": 160,
+          "Background": "0x0861",
+          "PositiveColor": "Yellow",
+          "NegativeColor": "Green"
+        },
+        {
+          "Type": "DrawText",
+          "X": 10,
+          "Y": 241,
+          "Prefix": "Casa: ",
+          "Suffix": "W",
+          "Font": 4,
+          "Color": "White",
+          "Text": "power:casa"
+        },
+        {
+          "Type": "DrawText",
+          "X": 10,
+          "Y": 270,
+          "Prefix": "Temp: ",
+          "Suffix": " C",
+          "Font": 2,
+          "Color": "White",
+          "Text": "datasource:interior:temperature"
+        },
+        {
+          "Type": "DrawText",
+          "X": 10,
+          "Y": 293,
+          "Prefix": "Humidade: ",
+          "Suffix": " %",
+          "Font": 2,
+          "Color": "White",
+          "Text": "datasource:interior:humidity"
+        }
+      ]
+    }
+  ]
+}
