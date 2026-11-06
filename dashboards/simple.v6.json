@@ -144,7 +144,7 @@
           "X": 5,
           "Y": 5,
           "Text": "function:Clock",
-          "Font": 5,
+          "Font": 4,
           "Color": "white"
         },
         {
@@ -304,9 +304,9 @@
           "Type": "DrawText",
           "X": 10,
           "Y": 196,
-          "Prefix": "Casa:",
-          "Suffix": "W",
-          "Font": 2,
+          "Prefix": "Casa: ",
+          "Suffix": " W ",
+          "Font": 4,
           "Text": "power:casa"
         }
       ]
