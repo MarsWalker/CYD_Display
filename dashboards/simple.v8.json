@@ -70,7 +70,14 @@
           "Suffix": " C",
           "Font": 4,
           "Color": "White",
-          "Text": "datasource:interior:temperature"
+          "Text": "datasource:interior:temperature",
+          "ColorRanges": {
+            "LowMax": 15,
+            "HighMax": 25,
+            "LowColor": "SkyBlue",
+            "MiddleColor": "Green",
+            "HighColor": "Red"
+          }
         },
         {
           "Type": "DrawText",
@@ -80,7 +87,14 @@
           "Suffix": " %",
           "Font": 4,
           "Color": "White",
-          "Text": "datasource:interior:humidity"
+          "Text": "datasource:interior:humidity",
+          "ColorRanges": {
+            "LowMax": 40,
+            "HighMax": 60,
+            "LowColor": "Orange",
+            "MiddleColor": "Green",
+            "HighColor": "SkyBlue"
+          }
         }
       ]
     }
