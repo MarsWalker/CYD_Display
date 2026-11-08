@@ -57,7 +57,7 @@
           "X": 10,
           "Y": 241,
           "Prefix": "Casa: ",
-          "Suffix": "W",
+          "Suffix": " W",
           "Font": 4,
           "Color": "White",
           "Text": "power:casa"
@@ -68,7 +68,7 @@
           "Y": 270,
           "Prefix": "Temp: ",
           "Suffix": " C",
-          "Font": 2,
+          "Font": 4,
           "Color": "White",
           "Text": "datasource:interior:temperature"
         },
@@ -78,7 +78,7 @@
           "Y": 293,
           "Prefix": "Humidade: ",
           "Suffix": " %",
-          "Font": 2,
+          "Font": 4,
           "Color": "White",
           "Text": "datasource:interior:humidity"
         }
