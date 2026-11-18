@@ -1,0 +1,218 @@
+{
+  "touchEnable": false,
+  "Log": {
+    "HA": false
+  },
+  "DataSources": [
+    {
+      "Type": "HA",
+      "Id": "doors",
+      "Refresh": 5000,
+      "Entities": [
+        "binary_sensor.porta_entrada",
+        "binary_sensor.porta_cozinha",
+        "binary_sensor.porta_alcapao",
+        "binary_sensor.porta_cozinha_cave",
+        "binary_sensor.porta_centro",
+        "binary_sensor.porta_oficina"
+      ]
+    },
+    {
+      "Type": "HA",
+      "Id": "people",
+      "Refresh": 5000,
+      "Entities": [
+        "binary_sensor.pessoas_escada",
+        "binary_sensor.pessoas_cozinha_cave",
+        "binary_sensor.pessoas_na_salinha",
+        "binary_sensor.pessoas_na_oficina"
+      ]
+    }
+  ],
+  "Screens": [
+    {
+      "Number": 1,
+      "Rotation": 1,
+      "Invert": true,
+      "Refresh": 1000,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "Type": "DrawText",
+          "X": 5,
+          "Y": 4,
+          "Text": "function:Clock",
+          "Font": 4,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawImageBool",
+          "X": 290,
+          "Y": 5,
+          "Value": "function:IsWIFIConnected",
+          "true": "DrawImage:wifi_on",
+          "false": "DrawImage:wifi_off"
+        },
+        {
+          "Type": "DrawText",
+          "X": 5,
+          "Y": 32,
+          "Text": "Portas",
+          "Font": 2,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_entrada",
+          "X": 4,
+          "Y": 46,
+          "Width": 154,
+          "Height": 40,
+          "Text": "Entrada",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_cozinha",
+          "X": 162,
+          "Y": 46,
+          "Width": 154,
+          "Height": 40,
+          "Text": "Cozinha",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_alcapao",
+          "X": 4,
+          "Y": 88,
+          "Width": 154,
+          "Height": 40,
+          "Text": "Alcapao",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_cozinha_cave",
+          "X": 162,
+          "Y": 88,
+          "Width": 154,
+          "Height": 40,
+          "Text": "Coz. Cave",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_centro",
+          "X": 4,
+          "Y": 130,
+          "Width": 154,
+          "Height": 40,
+          "Text": "Centro",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_oficina",
+          "X": 162,
+          "Y": 130,
+          "Width": 154,
+          "Height": 40,
+          "Text": "Oficina",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawText",
+          "X": 5,
+          "Y": 172,
+          "Text": "Presencas",
+          "Font": 2,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_escada",
+          "X": 4,
+          "Y": 186,
+          "Width": 75,
+          "Height": 40,
+          "Text": "Escada",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_cozinha_cave",
+          "X": 83,
+          "Y": 186,
+          "Width": 75,
+          "Height": 40,
+          "Text": "Cave",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_na_salinha",
+          "X": 162,
+          "Y": 186,
+          "Width": 75,
+          "Height": 40,
+          "Text": "Salinha",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_na_oficina",
+          "X": 241,
+          "Y": 186,
+          "Width": 75,
+          "Height": 40,
+          "Text": "Oficina",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Enabled": true
+        }
+      ]
+    }
+  ]
+}
