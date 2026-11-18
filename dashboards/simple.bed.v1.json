@@ -1,7 +1,8 @@
 {
   "touchEnable": false,
   "Log": {
-    "HA": false
+    "HA": false,
+    "Power": false
   },
   "DataSources": [
     {
@@ -27,6 +28,13 @@
         "binary_sensor.pessoas_na_salinha",
         "binary_sensor.pessoas_na_oficina"
       ]
+    },
+    {
+      "Type": "Power",
+      "Id": "casa",
+      "Entity": "sensor.energia_pj2101a_local_power",
+      "Unit": "W",
+      "Refresh": 2000
     }
   ],
   "Screens": [
@@ -42,27 +50,40 @@
         },
         {
           "Type": "DrawText",
-          "X": 5,
-          "Y": 4,
+          "X": 4,
+          "Y": 2,
           "Text": "function:Clock",
-          "Font": 4,
+          "Font": 2,
           "Color": "White"
         },
         {
+          "Type": "DrawText",
+          "X": 128,
+          "Y": 2,
+          "Text": "power:casa",
+          "Prefix": "Casa: ",
+          "Suffix": "W",
+          "Font": 2,
+          "Color": "Yellow"
+        },
+        {
           "Type": "DrawImageBool",
-          "X": 290,
-          "Y": 5,
+          "X": 296,
+          "Y": 0,
           "Value": "function:IsWIFIConnected",
           "true": "DrawImage:wifi_on",
           "false": "DrawImage:wifi_off"
         },
         {
-          "Type": "DrawText",
-          "X": 5,
-          "Y": 32,
-          "Text": "Portas",
-          "Font": 2,
-          "Color": "White"
+          "Type": "DrawPowerGraph",
+          "Source": "casa",
+          "X": 4,
+          "Y": 20,
+          "Width": 312,
+          "Height": 24,
+          "Background": "0x0861",
+          "PositiveColor": "Yellow",
+          "NegativeColor": "Green"
         },
         {
           "Type": "DrawHAButton",
@@ -149,22 +170,14 @@
           "Enabled": true
         },
         {
-          "Type": "DrawText",
-          "X": 5,
-          "Y": 172,
-          "Text": "Presencas",
-          "Font": 2,
-          "Color": "White"
-        },
-        {
           "Type": "DrawHAButton",
           "entity": "binary_sensor.pessoas_escada",
           "X": 4,
-          "Y": 186,
+          "Y": 172,
           "Width": 75,
           "Height": 40,
           "Text": "Escada",
-          "Font": 2,
+          "Font": 1,
           "Background": "Black",
           "OnColor": "Red",
           "OffColor": "Green",
@@ -174,11 +187,11 @@
           "Type": "DrawHAButton",
           "entity": "binary_sensor.pessoas_cozinha_cave",
           "X": 83,
-          "Y": 186,
+          "Y": 172,
           "Width": 75,
           "Height": 40,
           "Text": "Cave",
-          "Font": 2,
+          "Font": 1,
           "Background": "Black",
           "OnColor": "Red",
           "OffColor": "Green",
@@ -188,11 +201,11 @@
           "Type": "DrawHAButton",
           "entity": "binary_sensor.pessoas_na_salinha",
           "X": 162,
-          "Y": 186,
+          "Y": 172,
           "Width": 75,
           "Height": 40,
           "Text": "Salinha",
-          "Font": 2,
+          "Font": 1,
           "Background": "Black",
           "OnColor": "Red",
           "OffColor": "Green",
@@ -202,11 +215,11 @@
           "Type": "DrawHAButton",
           "entity": "binary_sensor.pessoas_na_oficina",
           "X": 241,
-          "Y": 186,
+          "Y": 172,
           "Width": 75,
           "Height": 40,
           "Text": "Oficina",
-          "Font": 2,
+          "Font": 1,
           "Background": "Black",
           "OnColor": "Red",
           "OffColor": "Green",
