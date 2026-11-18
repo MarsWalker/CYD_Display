@@ -1,0 +1,241 @@
+{
+  "touchEnable": false,
+  "Log": {
+    "HA": false,
+    "Power": false
+  },
+  "DataSources": [
+    {
+      "Type": "HA",
+      "Id": "doors",
+      "Refresh": 5000,
+      "Entities": [
+        "binary_sensor.porta_entrada",
+        "binary_sensor.porta_cozinha",
+        "binary_sensor.porta_alcapao",
+        "binary_sensor.porta_cozinha_cave",
+        "binary_sensor.porta_centro",
+        "binary_sensor.porta_oficina"
+      ]
+    },
+    {
+      "Type": "HA",
+      "Id": "people",
+      "Refresh": 5000,
+      "Entities": [
+        "binary_sensor.pessoas_escada",
+        "binary_sensor.pessoas_cozinha_cave",
+        "binary_sensor.pessoas_na_salinha",
+        "binary_sensor.pessoas_na_oficina"
+      ]
+    },
+    {
+      "Type": "Power",
+      "Id": "casa",
+      "Entity": "sensor.energia_pj2101a_local_power",
+      "Unit": "W",
+      "Refresh": 2000
+    }
+  ],
+  "Screens": [
+    {
+      "Number": 1,
+      "Rotation": 1,
+      "Invert": true,
+      "Refresh": 1000,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "Type": "DrawText",
+          "X": 4,
+          "Y": 1,
+          "Text": "function:Clock",
+          "Font": 2,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawText",
+          "X": 108,
+          "Y": 1,
+          "Text": "power:casa",
+          "Prefix": "Casa:",
+          "Suffix": "W",
+          "Font": 2,
+          "Color": "Yellow"
+        },
+        {
+          "Type": "DrawImageBool",
+          "X": 296,
+          "Y": 0,
+          "Value": "function:IsWIFIConnected",
+          "true": "DrawImage:wifi_on",
+          "false": "DrawImage:wifi_off"
+        },
+        {
+          "Type": "DrawPowerGraph",
+          "Source": "casa",
+          "X": 4,
+          "Y": 18,
+          "Width": 312,
+          "Height": 38,
+          "Background": "0x0861",
+          "PositiveColor": "Yellow",
+          "NegativeColor": "Green"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_entrada",
+          "X": 4,
+          "Y": 60,
+          "Width": 102,
+          "Height": 38,
+          "Text": "Entrada",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_cozinha",
+          "X": 110,
+          "Y": 60,
+          "Width": 100,
+          "Height": 38,
+          "Text": "Cozinha",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_alcapao",
+          "X": 214,
+          "Y": 60,
+          "Width": 102,
+          "Height": 38,
+          "Text": "Alcapao",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_cozinha_cave",
+          "X": 4,
+          "Y": 102,
+          "Width": 102,
+          "Height": 38,
+          "Text": "Coz.Cave",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_centro",
+          "X": 110,
+          "Y": 102,
+          "Width": 100,
+          "Height": 38,
+          "Text": "Centro",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_oficina",
+          "X": 214,
+          "Y": 102,
+          "Width": 102,
+          "Height": 38,
+          "Text": "Oficina",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_escada",
+          "X": 4,
+          "Y": 144,
+          "Width": 102,
+          "Height": 38,
+          "Text": "Escada",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_cozinha_cave",
+          "X": 110,
+          "Y": 144,
+          "Width": 100,
+          "Height": 38,
+          "Text": "Cave",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_na_salinha",
+          "X": 214,
+          "Y": 144,
+          "Width": 102,
+          "Height": 38,
+          "Text": "Salinha",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_na_oficina",
+          "X": 4,
+          "Y": 186,
+          "Width": 102,
+          "Height": 38,
+          "Text": "Oficina P.",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true
+        }
+      ]
+    }
+  ]
+}
