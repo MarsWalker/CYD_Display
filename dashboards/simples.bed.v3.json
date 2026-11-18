@@ -61,8 +61,8 @@
           "X": 108,
           "Y": 1,
           "Text": "power:casa",
-          "Prefix": "Casa:",
-          "Suffix": "W",
+          "Prefix": "Casa: ",
+          "Suffix": " W",
           "Font": 2,
           "Color": "Yellow"
         },
@@ -257,5 +257,10 @@
         }
       ]
     }
-  ]
+  ],
+  "IdleBrightness": {
+    "NightStart": "23:00",
+    "NightEnd": "07:00",
+    "Night": 10
+  }
 }
