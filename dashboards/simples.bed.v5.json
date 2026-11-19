@@ -26,7 +26,8 @@
         "binary_sensor.pessoas_escada",
         "binary_sensor.pessoas_cozinha_cave",
         "binary_sensor.pessoas_na_salinha",
-        "binary_sensor.pessoas_na_oficina"
+        "binary_sensor.pessoas_na_oficina",
+        "binary_sensor.pessoas_sala"
       ]
     },
     {
@@ -53,12 +54,12 @@
           "X": 4,
           "Y": 1,
           "Text": "function:Clock",
-          "Font": 3,
+          "Font": 4,
           "Color": "White"
         },
         {
           "Type": "DrawText",
-          "X": 108,
+          "X": 158,
           "Y": 1,
           "Text": "power:casa",
           "Prefix": "Casa: ",
@@ -255,6 +256,23 @@
           "Width": 102,
           "Height": 40,
           "Text": "Oficina",
+          "Font": 2,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "person_on",
+          "OffImage": "person_off"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_sala",
+          "X": 110,
+          "Y": 192,
+          "Width": 100,
+          "Height": 40,
+          "Text": "Sala",
           "Font": 2,
           "Background": "Black",
           "OnColor": "Red",
