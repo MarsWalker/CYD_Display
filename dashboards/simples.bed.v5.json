@@ -54,7 +54,7 @@
           "X": 4,
           "Y": 1,
           "Text": "function:Clock",
-          "Font": 4,
+          "Font": 6,
           "Color": "White"
         },
         {
@@ -64,7 +64,7 @@
           "Text": "power:casa",
           "Prefix": "Casa: ",
           "Suffix": " W",
-          "Font": 2,
+          "Font": 4,
           "Color": "White",
           "NegativeColor": "Green",
           "PositiveColor": "Yellow",
