@@ -286,8 +286,8 @@
     }
   ],
   "IdleBrightness": {
-    "NightStart": "23:00",
-    "NightEnd": "07:00",
+    "NightStart": "21:00",
+    "NightEnd": "09:00",
     "Night": 10
   }
 }
