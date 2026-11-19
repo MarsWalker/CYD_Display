@@ -19,7 +19,7 @@
       "Type": "DHT11",
       "Id": "interior",
       "Pin": 27,
-      "Refresh": 5000
+      "Refresh": 30000
     }
   ],
   "Screens": [
