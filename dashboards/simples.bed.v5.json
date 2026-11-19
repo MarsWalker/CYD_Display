@@ -60,7 +60,7 @@
         {
           "Type": "DrawText",
           "X": 4,
-          "Y": 28,
+          "Y": 38,
           "Text": "power:casa",
           "Prefix": "Casa: ",
           "Suffix": " W",
@@ -87,9 +87,9 @@
         {
           "Type": "DrawPowerGraph",
           "Source": "casa",
-          "X": 160,
+          "X": 164,
           "Y": 28,
-          "Width": 156,
+          "Width": 152,
           "Height": 44,
           "Background": "0x0861",
           "PositiveColor": "Yellow",
