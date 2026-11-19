@@ -54,13 +54,13 @@
           "X": 4,
           "Y": 1,
           "Text": "function:Clock",
-          "Font": 6,
+          "Font": 4,
           "Color": "White"
         },
         {
           "Type": "DrawText",
-          "X": 158,
-          "Y": 1,
+          "X": 4,
+          "Y": 28,
           "Text": "power:casa",
           "Prefix": "Casa: ",
           "Suffix": " W",
