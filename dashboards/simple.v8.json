@@ -71,13 +71,23 @@
           "Font": 4,
           "Color": "White",
           "Text": "datasource:interior:temperature",
-          "ColorRanges": {
-            "LowMax": 15,
-            "HighMax": 25,
-            "LowColor": "SkyBlue",
-            "MiddleColor": "Green",
-            "HighColor": "Red"
-          }
+          "ColorRanges": [
+            {
+              "Min": -1000,
+              "Max": 15,
+              "Color": "SkyBlue"
+            },
+            {
+              "Min": 15,
+              "Max": 25,
+              "Color": "Green"
+            },
+            {
+              "Min": 25,
+              "Max": 1000,
+              "Color": "Red"
+            }
+          ]
         },
         {
           "Type": "DrawText",
@@ -88,13 +98,23 @@
           "Font": 4,
           "Color": "White",
           "Text": "datasource:interior:humidity",
-          "ColorRanges": {
-            "LowMax": 40,
-            "HighMax": 60,
-            "LowColor": "Orange",
-            "MiddleColor": "Green",
-            "HighColor": "SkyBlue"
-          }
+          "ColorRanges": [
+            {
+              "Min": 0,
+              "Max": 40,
+              "Color": "Orange"
+            },
+            {
+              "Min": 40,
+              "Max": 60,
+              "Color": "Green"
+            },
+            {
+              "Min": 60,
+              "Max": 100,
+              "Color": "SkyBlue"
+            }
+          ]
         }
       ]
     }
