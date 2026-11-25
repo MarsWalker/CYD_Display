@@ -63,16 +63,16 @@
         },
         {
           "Type": "DrawText",
-          "X": 42,
+          "X": 6,
           "Y": 4,
           "Text": "function:Clock",
-          "Font": 4,
+          "Font": 2,
           "Color": "White"
         },
         {
           "Type": "DrawImageBool",
-          "X": 207,
-          "Y": 6,
+          "X": 90,
+          "Y": 4,
           "Value": "function:IsWIFIConnected",
           "true": "DrawImage:wifi_signal_on",
           "false": "DrawImage:wifi_signal_off"
@@ -80,7 +80,7 @@
         {
           "Type": "DrawText",
           "X": 6,
-          "Y": 34,
+          "Y": 25,
           "Text": "power:casa",
           "Prefix": "Casa: ",
           "Suffix": " W",
@@ -99,10 +99,10 @@
         {
           "Type": "DrawPowerGraph",
           "Source": "casa",
-          "X": 6,
-          "Y": 52,
-          "Width": 228,
-          "Height": 32,
+          "X": 118,
+          "Y": 0,
+          "Width": 122,
+          "Height": 82,
           "Background": "0x0861",
           "PositiveColor": "Yellow",
           "NegativeColor": "Green"
