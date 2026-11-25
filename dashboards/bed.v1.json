@@ -1,0 +1,354 @@
+{
+  "touchEnable": true,
+  "Log": {
+    "HA": false,
+    "Power": false
+  },
+  "DataSources": [
+    {
+      "Type": "HA",
+      "Id": "doors",
+      "Refresh": 5000,
+      "Entities": [
+        "binary_sensor.porta_entrada",
+        "binary_sensor.porta_cozinha",
+        "binary_sensor.porta_alcapao",
+        "binary_sensor.porta_cozinha_cave",
+        "binary_sensor.porta_centro",
+        "binary_sensor.porta_oficina"
+      ]
+    },
+    {
+      "Type": "HA",
+      "Id": "people",
+      "Refresh": 5000,
+      "Entities": [
+        "binary_sensor.pessoas_escada",
+        "binary_sensor.pessoas_cozinha_cave",
+        "binary_sensor.pessoas_na_salinha",
+        "binary_sensor.pessoas_na_oficina",
+        "binary_sensor.pessoas_sala"
+      ]
+    },
+    {
+      "Type": "Power",
+      "Id": "casa",
+      "Entity": "sensor.energia_pj2101a_local_power",
+      "Unit": "W",
+      "Refresh": 2000
+    },
+    {
+      "Type": "Weather",
+      "Id": "weather_local",
+      "Refresh": 900000,
+      "url": "https://api.open-meteo.com/v1/forecast?latitude=41.343&longitude=-8.477&current=temperature_2m,relative_humidity_2m,pressure_msl,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FLisbon&forecast_days=7",
+      "Map": {
+        "temperature": "current.temperature_2m",
+        "humidity": "current.relative_humidity_2m",
+        "pressure": "current.pressure_msl",
+        "code": "current.weather_code"
+      }
+    }
+  ],
+  "Screens": [
+    {
+      "Number": 1,
+      "Rotation": 0,
+      "Invert": true,
+      "Refresh": 1000,
+      "Objects": [
+        {
+          "Type": "FillScreen",
+          "Color": "Black"
+        },
+        {
+          "Type": "DrawText",
+          "X": 42,
+          "Y": 4,
+          "Text": "function:Clock",
+          "Font": 4,
+          "Color": "White"
+        },
+        {
+          "Type": "DrawImageBool",
+          "X": 207,
+          "Y": 6,
+          "Value": "function:IsWIFIConnected",
+          "true": "DrawImage:wifi_signal_on",
+          "false": "DrawImage:wifi_signal_off"
+        },
+        {
+          "Type": "DrawText",
+          "X": 6,
+          "Y": 34,
+          "Text": "power:casa",
+          "Prefix": "Casa: ",
+          "Suffix": " W",
+          "Font": 2,
+          "Color": "White",
+          "NegativeColor": "Green",
+          "PositiveColor": "Yellow",
+          "ColorRanges": [
+            {
+              "Min": 0,
+              "Max": 1000,
+              "Color": "White"
+            }
+          ]
+        },
+        {
+          "Type": "DrawPowerGraph",
+          "Source": "casa",
+          "X": 6,
+          "Y": 52,
+          "Width": 228,
+          "Height": 32,
+          "Background": "0x0861",
+          "PositiveColor": "Yellow",
+          "NegativeColor": "Green"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_entrada",
+          "X": 4,
+          "Y": 88,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Entrada",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "door_open",
+          "OffImage": "door_closed"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_cozinha",
+          "X": 122,
+          "Y": 88,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Cozinha",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "door_open",
+          "OffImage": "door_closed"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_alcapao",
+          "X": 4,
+          "Y": 126,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Alcapao",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "door_open",
+          "OffImage": "door_closed"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_cozinha_cave",
+          "X": 122,
+          "Y": 126,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Coz.Cave",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "door_open",
+          "OffImage": "door_closed"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_centro",
+          "X": 4,
+          "Y": 164,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Centro",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "door_open",
+          "OffImage": "door_closed"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.porta_oficina",
+          "X": 122,
+          "Y": 164,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Oficina",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "door_open",
+          "OffImage": "door_closed"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_escada",
+          "X": 4,
+          "Y": 202,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Escada",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "person_on",
+          "OffImage": "person_off"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_cozinha_cave",
+          "X": 122,
+          "Y": 202,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Cave",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "person_on",
+          "OffImage": "person_off"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_na_salinha",
+          "X": 4,
+          "Y": 240,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Salinha",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "person_on",
+          "OffImage": "person_off"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_na_oficina",
+          "X": 122,
+          "Y": 240,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Oficina",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "person_on",
+          "OffImage": "person_off"
+        },
+        {
+          "Type": "DrawHAButton",
+          "entity": "binary_sensor.pessoas_sala",
+          "X": 4,
+          "Y": 278,
+          "Width": 114,
+          "Height": 36,
+          "Text": "Sala",
+          "Font": 1,
+          "Background": "Black",
+          "OnColor": "Red",
+          "OffColor": "Green",
+          "Style": "NoStatus",
+          "Enabled": true,
+          "OnImage": "person_on",
+          "OffImage": "person_off"
+        }
+      ]
+    },
+    {
+      "Number": 2,
+      "Rotation": 0,
+      "Invert": true,
+      "Refresh": 1000,
+      "Objects": [
+        {
+          "Type": "DrawWeatherPanel",
+          "Source": "weather_local",
+          "Theme": {
+            "BackgroundTop": "#080F20",
+            "BackgroundBottom": "#101D38",
+            "Card": "#101B30",
+            "Text": "#FFFFFF",
+            "SecondaryText": "#D0E0F8",
+            "Divider": "#263954",
+            "Offline": "#708098"
+          },
+          "Layout": {
+            "DateX": 12,
+            "DateY": 9,
+            "IconX": 10,
+            "IconY": 31,
+            "TemperatureY": 45,
+            "DescriptionY": 103,
+            "MetricsY": 121,
+            "ForecastY": 140,
+            "RowHeight": 22,
+            "FooterY": 307
+          },
+          "Fonts": {
+            "Date": 2,
+            "Temperature": 6,
+            "Description": 1,
+            "Metrics": 1,
+            "Forecast": 2
+          },
+          "DateFormat": "YYYY-MM-DD HH:mm",
+          "TemperatureUnit": "Celsius",
+          "Icons": [
+            {
+              "Type": "WiFi",
+              "X": 207,
+              "Y": 6
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "IdleBrightness": {
+    "NightStart": "21:00",
+    "NightEnd": "09:00",
+    "Night": 10
+  }
+}
