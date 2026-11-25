@@ -356,7 +356,7 @@
             "Metrics": 1,
             "Forecast": 2
           },
-          "DateFormat": "YYYY-MM-DD HH:mm",
+          "DateFormat": "YYYY-MM-DD HH:mm:ss",
           "TemperatureUnit": "C",
           "Icons": [
             {
