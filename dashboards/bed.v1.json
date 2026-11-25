@@ -64,7 +64,7 @@
         {
           "Type": "DrawText",
           "X": 30,
-          "Y": 8,
+          "Y": 1,
           "Text": "function:Clock",
           "Font": 4,
           "Color": "White"
@@ -76,7 +76,7 @@
           "Text": "power:casa",
           "Prefix": "Casa: ",
           "Suffix": " W",
-          "Font": 2,
+          "Font": 4,
           "Color": "White",
           "NegativeColor": "Green",
           "PositiveColor": "Yellow",
@@ -317,14 +317,14 @@
           "Layout": {
             "DateX": 12,
             "DateY": 9,
-            "IconX": 10,
-            "IconY": 31,
             "TemperatureY": 45,
             "DescriptionY": 103,
             "MetricsY": 121,
             "ForecastY": 140,
             "RowHeight": 22,
-            "FooterY": 307
+            "FooterY": 307,
+            "WeatherIconX": 10,
+            "WeatherIconY": 31
           },
           "Fonts": {
             "Date": 2,
@@ -334,7 +334,7 @@
             "Forecast": 2
           },
           "DateFormat": "YYYY-MM-DD HH:mm",
-          "TemperatureUnit": "Celsius",
+          "TemperatureUnit": "C",
           "Icons": [
             {
               "Type": "WiFi",
