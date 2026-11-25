@@ -74,7 +74,7 @@
           "X": 6,
           "Y": 43,
           "Text": "power:casa",
-          "Prefix": "PW: ",
+          "Prefix": "P: ",
           "Suffix": " W",
           "Font": 4,
           "Color": "White",
