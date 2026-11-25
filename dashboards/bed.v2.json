@@ -97,7 +97,8 @@
           "Height": 82,
           "Background": "0x0861",
           "PositiveColor": "Yellow",
-          "NegativeColor": "Green"
+          "NegativeColor": "Green",
+          "MinScale": 1000
         },
         {
           "Type": "DrawImageBool",
@@ -363,7 +364,23 @@
               "X": 207,
               "Y": 6
             }
-          ]
+          ],
+          "Labels": {
+            "Today": "Hoje",
+            "Sunday": "Dom",
+            "Monday": "Seg",
+            "Tuesday": "Ter",
+            "Wednesday": "Qua",
+            "Thursday": "Qui",
+            "Friday": "Sex",
+            "Saturday": "Sab",
+            "Humidity": "Humidade",
+            "Pressure": "Pressão",
+            "Provider": "Open-Meteo",
+            "NoData": "A aguardar dados",
+            "Stale": "Dados antigos",
+            "NoWifi": "Sem Wi-Fi"
+          }
         }
       ]
     }
