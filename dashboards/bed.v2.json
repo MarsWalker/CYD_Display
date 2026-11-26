@@ -386,8 +386,10 @@
     }
   ],
   "IdleBrightness": {
-    "NightStart": "21:00",
-    "NightEnd": "09:00",
-    "Night": 10
+    "Timeout": 60,
+    "Normal": 100,
+    "Dim": 10,
+    "ActiveStart": "00:00",
+    "ActiveEnd": "23:59"
   }
 }
