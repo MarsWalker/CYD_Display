@@ -1,6 +1,7 @@
 {
   "touchEnable": true,
   "Log": {
+    "ShowInfoPage": true,
     "HA": false,
     "Power": false
   },
